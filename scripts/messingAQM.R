@@ -9,7 +9,51 @@
 # olayer: for what ocean layer do you want the species
 # variable: what variable envelope do you want? # maybe all of them and then any want can pick
 
-aqua_start <- function(path, outdir, olayer, variable, ...) { # filter by depth? perhaps 4 layers? 
+aqua_start <- function(path, outdir, olayer, variable, probability, ...) { # filter by depth? perhaps 4 layers? 
+  
+  library(data.table)
+  library(dplyr)
+  
+  outdir <- "CSVs/"
+  olayer <- "surface"
+  
+  
+  # Reading input files
+  hcaf <- fread("hcaf_species_native_richness_gte10.csv") %>% 
+    dplyr::select(SpeciesID, CenterLat, CenterLong, probability) %>% 
+    dplyr::filter(probability >= 0.4) # or probability
+  hspen <- fread("hspen_richness_all_gte10_240616.csv") %>% 
+    dplyr::select(c(2:16)) # SpeciesID + DepthEnvelope + tempEnvelop + SalinityEnvelope
+  
+  # Define ocean layers and 
+  speciesID <- hspen$SpeciesID
+  
+  
+  
+  
+  for (i in speciesID) { 
+    if (olayer == "surface") {
+        
+        hspen_sf <- hspen %>% filter(DepthPrefMax >= 0 & DepthPrefMax < 200) # DepthMean?
+        IDs_sf <- vector("list", nrow(hspen_sf))
+          IDs_sf[[i]] <- left_join(x = hcaf[hcaf$SpeciesID == speciesID[i],], y = hspen_sf[hspen_sf$SpeciesID == speciesID[i],], by = "SpeciesID")
+        
+          IDs_csv <- paste(speciesID[i])
+          write.csv(IDs_sf[[i]], paste(outdir, IDs_csv, ".csv", sep = ""), row.names = FALSE)
+          
+      } else if (olayer == mesopelagic) {
+        hspen_mp <- hspen %>% filter(DepthPrefMax >= 200 & DepthPrefMax < 1000) # DepthMean?
+      } else if (olayer == bathypelagic) {
+        hspen_bp <- hspen %>% filter(DepthPrefMax >= 1000 & DepthPrefMax < 4000) # DepthMean?
+      } else if (olayer == abyssopelagic) {
+        hspen_abp <- hspen %>% filter(DepthPrefMax >= 4000) # DepthMean?
+      } else {
+        hspen_all <- hspen
+      }
+    
+    }
+  
+  return(IDs_sf)
   
   
 }
@@ -21,7 +65,7 @@ library(raster)
 library(sf)
 
 # reading files
-hcaf <- fread("AquaMaps/hcaf_species_native_richness_gte10.csv")
+hcaf <- fread("AquaMaps/hcaf_species_native_richness_gte10.csv") 
   # glimpse(hcaf)
   # [1] "SpeciesID"   "CsquareCode"
   # [3] "probability" "CenterLat"  
