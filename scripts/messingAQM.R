@@ -53,18 +53,6 @@ aqua_start <- function(path, outdir, olayer, variable, probability, ...) { # fil
       speciesID <- hspen_sf$SpeciesID[1:100]
       
     
-    IDs_sf <- vector("list", length(speciesID))
-    
-    cuts <- cut(length(speciesID), ncores)
-    levels(cuts)
-    
-    system.time(foreach(i = 1:length(speciesID), .combine = rbind, .packages = c("data.table", "dplyr"), .multicombine = TRUE) %dopar% {
-        x <- hcaf[hcaf$SpeciesID == speciesID[i],]
-        y <- hspen_sf[hspen_sf$SpeciesID == speciesID[i],]
-        z <- left_join(x = x, y = y, by = "SpeciesID")
-        IDs_sf[[i]] <- z
-      }) # 1.6 minutes
-    stopCluster(cl)
     
     IDs_sf <- vector("list", length(speciesID))
     system.time(for(i in 1:length(speciesID)) {
@@ -78,16 +66,17 @@ aqua_start <- function(path, outdir, olayer, variable, probability, ...) { # fil
       print(paste0(i, " of ", length(speciesID)))
     }) # ~1 minute for 60 species...
     
-    
-    hspen_sf <- hspen %>% filter(DepthPrefMax >= 0 & DepthPrefMax < 200) # DepthMean? ~10k species
-    speciesID <- hspen_sf$SpeciesID[1:5]
-    
-    
-    x <- hcaf[hcaf$SpeciesID == speciesID[1],]
-    y <- hspen_sf[hspen_sf$SpeciesID == speciesID[1],]
-    z <- left_join(x = x, y = y, by = "SpeciesID")
-    
-    # IDs_sf[[i]] <- left_join(x = hcaf[hcaf$SpeciesID == speciesID[i],], y = hspen_sf[hspen_sf$SpeciesID == speciesID[i],], by = "SpeciesID")
+    # ### figure it out if this structure runs in parallel
+    # IDs_sf <- vector("list", length(speciesID))
+    # cuts <- cut(length(speciesID), ncores)
+    # levels(cuts)
+    # system.time(foreach(i = 1:length(speciesID), .combine = rbind, .packages = c("data.table", "dplyr"), .multicombine = TRUE) %dopar% {
+    #   x <- hcaf[hcaf$SpeciesID == speciesID[i],]
+    #   y <- hspen_sf[hspen_sf$SpeciesID == speciesID[i],]
+    #   z <- left_join(x = x, y = y, by = "SpeciesID")
+    #   IDs_sf[[i]] <- z
+    # }) # 1.6 minutes
+    # stopCluster(cl)
     
     
     
