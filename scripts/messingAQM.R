@@ -13,83 +13,98 @@ aqua_start <- function(path, outdir, olayer, variable, probability, ...) { # fil
   
   library(data.table)
   library(dplyr)
+  library(foreach)
+  library(doParallel)
   
   outdir <- "CSVs/"
   olayer <- "surface"
+  
+  # Set up to run trajectories in parallel
+  cores  <-  detectCores()
+  ncores <- cores -1 
+  cl <- makeCluster(ncores)
+  registerDoParallel(cl)
+  
+  # folders <- dir("../AquaMaps_wflow/")
   
   
   # Reading input files
   hcaf <- fread("hcaf_species_native_richness_gte10.csv") %>% 
     dplyr::select(SpeciesID, CenterLat, CenterLong, probability) %>% 
-    dplyr::filter(probability >= 0.4) # or probability
-  hspen <- fread("hspen_richness_all_gte10_240616.csv") %>% 
+    dplyr::filter(probability >= 0.4) # or == probability
+    # [1] "SpeciesID"   "CsquareCode"
+    # [3] "probability" "CenterLat"  
+    # [5] "CenterLong"  "LOICZID" 
+  
+  hspen <- fread("AquaMaps/hspen_richness_all_gte10_240616.csv") %>% 
     dplyr::select(c(2:16)) # SpeciesID + DepthEnvelope + tempEnvelop + SalinityEnvelope
+    # "SpeciesID"  
+    # "DepthMin" "DepthPrefMin" "DepthPrefMax" "DepthMax" "MeanDepth"
+    # "Pelagic"
+    # "TempMin" "TempPrefMin" "TempPrefMax" "TempMax"
+    # "SalinityMin" "SalinityPrefMin" "SalinityPrefMax" "SalinityMax"
+  
   
   # Define ocean layers and 
-  speciesID <- hspen$SpeciesID
   
-  
-  
-  
-  for (i in speciesID) { 
-    if (olayer == "surface") {
-        
-        hspen_sf <- hspen %>% filter(DepthPrefMax >= 0 & DepthPrefMax < 200) # DepthMean?
-        IDs_sf <- vector("list", nrow(hspen_sf))
-          IDs_sf[[i]] <- left_join(x = hcaf[hcaf$SpeciesID == speciesID[i],], y = hspen_sf[hspen_sf$SpeciesID == speciesID[i],], by = "SpeciesID")
-        
-          IDs_csv <- paste(speciesID[i])
-          write.csv(IDs_sf[[i]], paste(outdir, IDs_csv, ".csv", sep = ""), row.names = FALSE)
-          
-      } else if (olayer == mesopelagic) {
-        hspen_mp <- hspen %>% filter(DepthPrefMax >= 200 & DepthPrefMax < 1000) # DepthMean?
-      } else if (olayer == bathypelagic) {
-        hspen_bp <- hspen %>% filter(DepthPrefMax >= 1000 & DepthPrefMax < 4000) # DepthMean?
-      } else if (olayer == abyssopelagic) {
-        hspen_abp <- hspen %>% filter(DepthPrefMax >= 4000) # DepthMean?
-      } else {
-        hspen_all <- hspen
-      }
+  if (olayer == "surface") {
     
-    }
-  
-  return(IDs_sf)
-  
+    hspen_sf <- hspen %>% filter(DepthPrefMax >= 0 & DepthPrefMax < 200) # DepthMean? ~10k species
+      speciesID <- hspen_sf$SpeciesID[1:100]
+      
+    
+    IDs_sf <- vector("list", length(speciesID))
+    
+    cuts <- cut(length(speciesID), ncores)
+    levels(cuts)
+    
+    system.time(foreach(i = 1:length(speciesID), .combine = rbind, .packages = c("data.table", "dplyr"), .multicombine = TRUE) %dopar% {
+        x <- hcaf[hcaf$SpeciesID == speciesID[i],]
+        y <- hspen_sf[hspen_sf$SpeciesID == speciesID[i],]
+        z <- left_join(x = x, y = y, by = "SpeciesID")
+        IDs_sf[[i]] <- z
+      }) # 1.6 minutes
+    stopCluster(cl)
+    
+    IDs_sf <- vector("list", length(speciesID))
+    system.time(for(i in 1:length(speciesID)) {
+      
+      x <- hcaf[hcaf$SpeciesID == speciesID[i],]
+      y <- hspen_sf[hspen_sf$SpeciesID == speciesID[i],]
+      z <- left_join(x = x, y = y, by = "SpeciesID")
+      IDs_sf[[i]] <- z
+      name.csv <- paste(speciesID[i], sep = "_")
+        write.csv(IDs_sf[[i]], paste("CSVs/", name.csv, ".csv", sep = ""), row.names = FALSE)
+      print(paste0(i, " of ", length(speciesID)))
+    }) # ~1 minute for 60 species...
+    
+    
+    hspen_sf <- hspen %>% filter(DepthPrefMax >= 0 & DepthPrefMax < 200) # DepthMean? ~10k species
+    speciesID <- hspen_sf$SpeciesID[1:5]
+    
+    
+    x <- hcaf[hcaf$SpeciesID == speciesID[1],]
+    y <- hspen_sf[hspen_sf$SpeciesID == speciesID[1],]
+    z <- left_join(x = x, y = y, by = "SpeciesID")
+    
+    # IDs_sf[[i]] <- left_join(x = hcaf[hcaf$SpeciesID == speciesID[i],], y = hspen_sf[hspen_sf$SpeciesID == speciesID[i],], by = "SpeciesID")
+    
+    
+    
+    IDs_csv <- paste(speciesID[i])
+    write.csv(IDs_sf[[i]], paste(outdir, IDs_csv, ".csv", sep = ""), row.names = FALSE)
+    
+  } else if (olayer == mesopelagic) {
+    hspen_mp <- hspen %>% filter(DepthPrefMax >= 200 & DepthPrefMax < 1000) # DepthMean?
+  } else if (olayer == bathypelagic) {
+    hspen_bp <- hspen %>% filter(DepthPrefMax >= 1000 & DepthPrefMax < 4000) # DepthMean?
+  } else if (olayer == abyssopelagic) {
+    hspen_abp <- hspen %>% filter(DepthPrefMax >= 4000) # DepthMean?
+  } else {
+    hspen_all <- hspen
+  }
   
 }
-
-# 
-library(data.table)
-library(dplyr)
-library(raster)
-library(sf)
-
-# reading files
-hcaf <- fread("AquaMaps/hcaf_species_native_richness_gte10.csv") 
-  # glimpse(hcaf)
-  # [1] "SpeciesID"   "CsquareCode"
-  # [3] "probability" "CenterLat"  
-  # [5] "CenterLong"  "LOICZID" 
-  hcaf <- hcaf %>% dplyr::select(SpeciesID, CenterLat, CenterLong, probability)
-hspen <- fread("AquaMaps/hspen_richness_all_gte10_240616.csv")
-  # glimpse(hspen)
-  # "SpeciesID"  
-  # "DepthMin" "DepthPrefMin" "DepthPrefMax" "DepthMax" "MeanDepth"
-  # "Pelagic"
-  # "TempMin" "TempPrefMin" "TempPrefMax" "TempMax"
-  # "SalinityMin" "SalinityPrefMin" "SalinityPrefMax" "SalinityMax"
-  hspen <- hspen %>% dplyr::select(c(2:16))
-  meso <- hspen %>% filter(DepthPrefMax >= 200 & DepthPrefMax < 1000) 
-  glimpse(meso)
-
-  # for (i in SpeciesID) {do the left join and then write it into an csv formar? to much?}
-  speciesID <- hspen$SpeciesID
-  
-  new_aqm <- left_join(x = hcaf[hcaf$SpeciesID == speciesID[1],], y = hspen[hspen$SpeciesID == speciesID[1],], by = "SpeciesID")
-  glimpse(new_aqm)
-  write.csv(new_aqm, "new_aqm.csv", row.names = FALSE)  # .CSV names based on speciesID
-  new_aqm2 <- new_aqm %>% filter(probability >= 0.4)
-  glimpse(new_aqm2)
   
   rs_trial <- rasterFromXYZ(as.data.frame(new_aqm2)[, c("CenterLong", "CenterLat", "probability", "TempPrefMax", "SalinityPrefMax")]) # 0.5 deg of resolution
     plot(rs_trial)
