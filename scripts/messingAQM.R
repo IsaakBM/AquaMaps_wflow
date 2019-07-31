@@ -15,22 +15,26 @@
 # 3. a lookup table of which species are found in each half-degree cell (and the "probability of occurrence" of that species in that cell)  
 
 
-aqua_start <- function(path, outdir, olayer, probability, ...) { # filter by depth? perhaps 4 layers? 
+aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by depth? perhaps 4 layers? 
   
   library(data.table)
   library(dplyr)
   library(foreach)
   library(doParallel)
   
-  # folders <- dir("../AquaMaps_wflow/")
+  # file's names
+  dir <- path
+  first_csv <- paste(dir, "hcaf_species_native_richness_gte10.csv", sep = "") # try a more generic name for those files
+  second_csv <- paste(dir, "hspen_richness_all_gte10_240616.csv", sep = "")
+  
   # Reading input files
-  hcaf <- fread("hcaf_species_native_richness_gte10.csv") %>% 
+  hcaf <- fread(first_csv) %>% 
     dplyr::select(SpeciesID, CenterLat, CenterLong, probability) %>% 
-    dplyr::filter(probability >= 0.4) # or == probability
+    dplyr::filter(probability >= prob_threshold) # or == probability
     # [1] "SpeciesID"   "CsquareCode"
     # [3] "probability" "CenterLat"  
     # [5] "CenterLong"  "LOICZID" 
-  hspen <- fread("hspen_richness_all_gte10_240616.csv") %>% 
+  hspen <- fread(second_csv) %>% 
     dplyr::select(c(2:16)) # SpeciesID + DepthEnvelope + tempEnvelop + SalinityEnvelope
     # "SpeciesID"  
     # "DepthMin" "DepthPrefMin" "DepthPrefMax" "DepthMax" "MeanDepth"
