@@ -47,7 +47,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by 
   ncores <- cores -1 
   cl <- makeCluster(ncores)
   registerDoParallel(cl)
-  
+
   # Define ocean layers and perform the analysis
   if (olayer == "surface") {
     hspen_sf <- hspen %>% filter(DepthPrefMax >= 0 & DepthPrefMax < 200) # DepthMean? ~10k species
@@ -60,10 +60,13 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by 
         z <- left_join(x = x, y = y, by = "SpeciesID")
         IDs_sf[[i]] <- z
       }
+      stopCluster(cl)
       # write list elements (speciesID)
-        name.csv <- paste(speciesID[i], "01_surface", sep = "_")
-        write.csv(IDs_sf[[i]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-        print(paste0(i, " of ", length(speciesID)))
+        for(j in 1:length(IDs_sf)) {
+          name.csv <- paste(speciesID[j], "01_surface", sep = "_")
+          write.csv(IDs_sf[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
+          print(paste0(j, " of ", length(speciesID)))
+        }
     
   } else if (olayer == "mesopelagic") {
     hspen_mp <- hspen %>% filter(DepthPrefMax >= 200 & DepthPrefMax < 1000) # DepthMean?
@@ -77,9 +80,11 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by 
         IDs_mp[[i]] <- z
       }
       # write list elements (speciesID)
-        name.csv <- paste(speciesID[i], "02_mesopelagic", sep = "_")
-        write.csv(IDs_mp[[i]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-        print(paste0(i, " of ", length(speciesID)))
+        for(j in 1:length(IDs_mp)) {
+          name.csv <- paste(speciesID[j], "02_mesopelagic", sep = "_")
+          write.csv(IDs_mp[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
+          print(paste0(j, " of ", length(speciesID)))
+        }
     
   } else if (olayer == "bathypelagic") {
     hspen_bp <- hspen %>% filter(DepthPrefMax >= 1000 & DepthPrefMax < 4000) # DepthMean?
@@ -93,9 +98,11 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by 
         IDs_bp[[i]] <- z
       }
       # write list elements (speciesID)
-        name.csv <- paste(speciesID[i], "03_bathypelagic", sep = "_")
-        write.csv(IDs_bp[[i]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-        print(paste0(i, " of ", length(speciesID)))
+        for(j in 1:length(IDs_bp)) {
+          name.csv <- paste(speciesID[j], "03_bathypelagic", sep = "_")
+          write.csv(IDs_bp[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
+          print(paste0(j, " of ", length(speciesID)))
+        }
     
   } else if (olayer == "abyssopelagic") {
     hspen_abp <- hspen %>% filter(DepthPrefMax >= 4000) # DepthMean?
@@ -109,9 +116,11 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by 
         IDs_abp[[i]] <- z
       }
       # write list elements (speciesID)
-        name.csv <- paste(speciesID[i], "04_abyssopelagic", sep = "_")
-        write.csv(IDs_abp[[i]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-        print(paste0(i, " of ", length(speciesID)))
+        for(j in 1:length(IDs_abp)) {
+          name.csv <- paste(speciesID[j], "04_abyssopelagic", sep = "_")
+          write.csv(IDs_abp[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
+          print(paste0(j, " of ", length(speciesID)))
+        }
     
   } else {
     hspen_all <- hspen
@@ -125,11 +134,12 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by 
         IDs_all[[i]] <- z
       }
       # write list elements (speciesID)
-        name.csv <- paste(speciesID[i], "05_allSpecies", sep = "_")
-        write.csv(IDs_all[[i]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-        print(paste0(i, " of ", length(speciesID)))
+        for(j in 1:length(IDs_all)) {
+          name.csv <- paste(speciesID[j], "05_all", sep = "_")
+          write.csv(IDs_all[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
+          print(paste0(j, " of ", length(speciesID)))
+        }
   }
-  stopCluster(cl)
   
   ifelse(olayer == "surface", return(IDs_sf), 
          ifelse(olayer == "mesopelagic", return(IDs_mp), 
