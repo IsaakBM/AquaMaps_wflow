@@ -42,110 +42,42 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by 
     # "TempMin" "TempPrefMin" "TempPrefMax" "TempMax"
     # "SalinityMin" "SalinityPrefMin" "SalinityPrefMax" "SalinityMax"
   
-  # Set up parallel structure
-  cores  <-  detectCores()
-  ncores <- cores -1 
-  cl <- makeCluster(ncores)
-  registerDoParallel(cl)
-
-  # Define ocean layers and perform the analysis
-  if (olayer == "surface") {
-    hspen_sf <- hspen %>% filter(DepthPrefMax >= 0 & DepthPrefMax < 200) # DepthMean? ~10k species
-      speciesID <- hspen_sf$SpeciesID # 10106 species
-    IDs_sf <- vector("list", length(speciesID)) # create  vector to allocate results
-    # Loops (~34 minutes with 11 cores)
-      IDs_sf <- foreach(i = 1:length(speciesID), .packages = c("data.table", "dplyr")) %dopar% { # if you dont add any combine argument it will return a list
-        x <- hcaf[hcaf$SpeciesID == speciesID[i],]
-        y <- hspen_sf[hspen_sf$SpeciesID == speciesID[i],]
-        z <- left_join(x = x, y = y, by = "SpeciesID")
-        IDs_sf[[i]] <- z
-      }
-      stopCluster(cl)
-      # write list elements (speciesID)
-        for(j in 1:length(IDs_sf)) {
-          name.csv <- paste(speciesID[j], "01_surface", sep = "_")
-          write.csv(IDs_sf[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-          print(paste0(j, " of ", length(speciesID)))
-        }
-    
+  # Filtering by layers before for loops
+  if(olayer == "surface") {
+    hspen_v2 <- hspen %>% filter(DepthPrefMax >= 0 & DepthPrefMax < 200)
   } else if (olayer == "mesopelagic") {
-    hspen_mp <- hspen %>% filter(DepthPrefMax >= 200 & DepthPrefMax < 1000) # DepthMean?
-      speciesID <- hspen_mp$SpeciesID # 3130
-    IDs_mp <- vector("list", length(speciesID))
-    # Loops
-      IDs_mp <- foreach(i = 1:length(speciesID), .packages = c("data.table", "dplyr")) %dopar% { # if you dont add any combine argument it will return a list
-        x <- hcaf[hcaf$SpeciesID == speciesID[i],]
-        y <- hspen_mp[hspen_mp$SpeciesID == speciesID[i],]
-        z <- left_join(x = x, y = y, by = "SpeciesID")
-        IDs_mp[[i]] <- z
-      }
-      # write list elements (speciesID)
-        for(j in 1:length(IDs_mp)) {
-          name.csv <- paste(speciesID[j], "02_mesopelagic", sep = "_")
-          write.csv(IDs_mp[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-          print(paste0(j, " of ", length(speciesID)))
-        }
-    
+    hspen_v2 <- hspen %>% filter(DepthPrefMax >= 200 & DepthPrefMax < 1000)
   } else if (olayer == "bathypelagic") {
-    hspen_bp <- hspen %>% filter(DepthPrefMax >= 1000 & DepthPrefMax < 4000) # DepthMean?
-      speciesID <- hspen_bp$SpeciesID # 890 species
-    IDs_bp <- vector("list", length(speciesID))
-    # Loops
-      IDs_bp <- foreach(i = 1:length(speciesID), .packages = c("data.table", "dplyr")) %dopar% { # if you dont add any combine argument it will return a list
-        x <- hcaf[hcaf$SpeciesID == speciesID[i],]
-        y <- hspen_bp[hspen_bp$SpeciesID == speciesID[i],]
-        z <- left_join(x = x, y = y, by = "SpeciesID")
-        IDs_bp[[i]] <- z
-      }
-      # write list elements (speciesID)
-        for(j in 1:length(IDs_bp)) {
-          name.csv <- paste(speciesID[j], "03_bathypelagic", sep = "_")
-          write.csv(IDs_bp[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-          print(paste0(j, " of ", length(speciesID)))
-        }
-    
+    hspen_v2 <- hspen %>% filter(DepthPrefMax >= 1000 & DepthPrefMax < 4000)
   } else if (olayer == "abyssopelagic") {
-    hspen_abp <- hspen %>% filter(DepthPrefMax >= 4000) # DepthMean?
-      speciesID <- hspen_abp$SpeciesID # 47 species
-    IDs_abp <- vector("list", length(speciesID))
-    # Loops
-      IDs_abp <- foreach(i = 1:length(speciesID), .packages = c("data.table", "dplyr")) %dopar% { # if you dont add any combine argument it will return a list
-        x <- hcaf[hcaf$SpeciesID == speciesID[i],]
-        y <- hspen_abp[hspen_abp$SpeciesID == speciesID[i],]
-        z <- left_join(x = x, y = y, by = "SpeciesID")
-        IDs_abp[[i]] <- z
-      }
-      # write list elements (speciesID)
-        for(j in 1:length(IDs_abp)) {
-          name.csv <- paste(speciesID[j], "04_abyssopelagic", sep = "_")
-          write.csv(IDs_abp[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-          print(paste0(j, " of ", length(speciesID)))
-        }
-    
+    hspen_v2 <- hspen %>% filter(DepthPrefMax >= 4000)
   } else {
-    hspen_all <- hspen
-      speciesID <- hspen_bp$SpeciesID
-    IDs_all <- vector("list", length(speciesID))
-    # Loops
-      IDs_all <- foreach(i = 1:length(speciesID), .packages = c("data.table", "dplyr")) %dopar% { # if you dont add any combine argument it will return a list
-        x <- hcaf[hcaf$SpeciesID == speciesID[i],]
-        y <- hspen_all[hspen_all$SpeciesID == speciesID[i],]
-        z <- left_join(x = x, y = y, by = "SpeciesID")
-        IDs_all[[i]] <- z
-      }
-      # write list elements (speciesID)
-        for(j in 1:length(IDs_all)) {
-          name.csv <- paste(speciesID[j], "05_all", sep = "_")
-          write.csv(IDs_all[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-          print(paste0(j, " of ", length(speciesID)))
-        }
+    hspen_v2 <- hspen
   }
+    speciesID <- hspen_v2$SpeciesID # how many species?
+    IDs_df <- vector("list", length(speciesID)) # create  vector to allocate results
   
-  ifelse(olayer == "surface", return(IDs_sf), 
-         ifelse(olayer == "mesopelagic", return(IDs_mp), 
-                ifelse(olayer == "bathypelagic", return(IDs_bp), 
-                       ifelse(olayer == "abyssopelagic", return(IDs_abp), return(IDs_all)))))
-  
+  # Set up parallel structure
+    cores  <-  detectCores()
+    ncores <- cores -1 
+    cl <- makeCluster(ncores)
+    registerDoParallel(cl)
+    
+  # Loops (~34 minutes with 11 cores)
+    IDs_df <- foreach(i = 1:length(speciesID), .packages = c("data.table", "dplyr")) %dopar% { # if you dont add any combine argument it will return a list
+      x <- hcaf[hcaf$SpeciesID == speciesID[i],]
+      y <- hspen_v2[hspen_v2$SpeciesID == speciesID[i],]
+      z <- left_join(x = x, y = y, by = "SpeciesID")
+      IDs_df[[i]] <- z
+    }
+    stopCluster(cl)
+    # write list elements (speciesID)
+      for(j in 1:length(IDs_df)) {
+        name.csv <- paste(speciesID[j], olayer, sep = "_")
+        write.csv(IDs_df[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
+        print(paste0(j, " of ", length(speciesID)))
+      }
+    return(IDs_df)
 }
   
   
