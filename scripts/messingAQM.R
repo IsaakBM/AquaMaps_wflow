@@ -10,9 +10,9 @@
 # variable: what variable envelope do you want? # maybe all of them and then any want can pick (not really)
 
 # Input Files
-# 1. species information (e.g. species ID, taxonomy, "reviewed" or not, but without spatial information)
-# 2. information for each half-degree cell (e.g. max/min depth, salinity, temperature, etc)
-# 3. a lookup table of which species are found in each half-degree cell (and the "probability of occurrence" of that species in that cell)  
+# 1. species information (e.g. species ID, taxonomy, "reviewed" or not, but without spatial information)  = cell.csv
+# 2. information for each half-degree cell (e.g. max/min depth, salinity, temperature, etc) = hpen.csv
+# 3. a lookup table of which species are found in each half-degree cell (and the "probability of occurrence" of that species in that cell)   = hcaf.csv
 
 
 aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by depth? perhaps 4 layers? 
@@ -23,9 +23,9 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by 
   library(doParallel)
   
   # file's names
-  dir <- path
-  first_csv <- paste(dir, "hcaf_species_native_richness_gte10.csv", sep = "") # try a more generic name for those files
-  second_csv <- paste(dir, "hspen_richness_all_gte10_240616.csv", sep = "")
+  dir <- dir(path, pattern = ".csv")
+  first_csv <- paste(path, dir[2], sep = "")
+  second_csv <- paste(path, dir[3], sep = "")
   
   # Reading input files
   hcaf <- fread(first_csv) %>% 
