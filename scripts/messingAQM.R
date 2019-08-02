@@ -61,16 +61,15 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, ...) { # add 
     ncores <- cores -1 
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
-  # Loops (~34 minutes with 11 cores)
-    IDs_df <- foreach(i = 1:length(speciesID), .packages = c("data.table", "dplyr")) %dopar% { # if you dont add any combine argument it will return a list
-      x <- hcaf[hcaf$SpeciesID == speciesID[i],]
-      y <- hspen_v2[hspen_v2$SpeciesID == speciesID[i],]
-      z <- left_join(x = x, y = y, by = "SpeciesID")
-      IDs_df[[i]] <- z
-    }
-    stopCluster(cl)
-    
-    # 
+    # Loops (~34 minutes with 11 cores)
+      IDs_df <- foreach(i = 1:length(speciesID), .packages = c("data.table", "dplyr")) %dopar% { # if you dont add any combine argument it will return a list
+        x <- hcaf[hcaf$SpeciesID == speciesID[i],]
+        y <- hspen_v2[hspen_v2$SpeciesID == speciesID[i],]
+        z <- left_join(x = x, y = y, by = "SpeciesID")
+        IDs_df[[i]] <- z
+      }
+      stopCluster(cl)
+  # Defining outcome
     if(data == "species") { # write list elements (speciesID)
       for(j in 1:length(IDs_df)) {
         name.csv <- paste(speciesID[j], olayer, sep = "_")
@@ -80,11 +79,11 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, ...) { # add 
     } else if (data == "richness") { # write a unique data.frame for total richness
       sp_richness <- do.call(rbind, IDs_df)
         sp_richness <- sp_richness %>% group_by(CenterLat, CenterLong) %>% summarise(richness = n()) %>% data.frame()
+      name.csv <- paste("spp_richness", olayer, sep = "_")
       write.csv(sp_richness, paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
     } else {
       IDs_df <- IDs_df
     }
-    
     ifelse(data == "species", return(IDs_df), 
            ifelse(data == "richness", return(sp_richness), IDs_df))
 }
