@@ -7,15 +7,15 @@
 # path: directory of aquampas.csv files
 # outdir: where to put the .csv species files
 # olayer: for what ocean layer do you want the species
-# variable: what variable envelope do you want? # maybe all of them and then any want can pick (not really)
+# data: by species or richness?
 
 # Input Files
-# 1. species information (e.g. species ID, taxonomy, "reviewed" or not, but without spatial information)  = cell.csv
+# 1. species information (e.g. species ID, taxonomy, "reviewed" or not, but without spatial information)  = hcaf.csv
 # 2. information for each half-degree cell (e.g. max/min depth, salinity, temperature, etc) = hpen.csv
-# 3. a lookup table of which species are found in each half-degree cell (and the "probability of occurrence" of that species in that cell)   = hcaf.csv
+# 3. a lookup table of which species are found in each half-degree cell (and the "probability of occurrence" of that species in that cell)   = cell.csv
 
 
-aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by depth? perhaps 4 layers? 
+aqua_start <- function(path, outdir, olayer, prob_threshold, data, ...) { # add species by species or richness?
   
   library(data.table)
   library(dplyr)
@@ -42,7 +42,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by 
     # "TempMin" "TempPrefMin" "TempPrefMax" "TempMax"
     # "SalinityMin" "SalinityPrefMin" "SalinityPrefMax" "SalinityMax"
   
-  # Filtering by layers before for loops
+  # Filtering by layers before loops
   if(olayer == "surface") {
     hspen_v2 <- hspen %>% filter(DepthPrefMax >= 0 & DepthPrefMax < 200)
   } else if (olayer == "mesopelagic") {
@@ -56,13 +56,11 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by 
   }
     speciesID <- hspen_v2$SpeciesID # how many species?
     IDs_df <- vector("list", length(speciesID)) # create  vector to allocate results
-  
   # Set up parallel structure
     cores  <-  detectCores()
     ncores <- cores -1 
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
-    
   # Loops (~34 minutes with 11 cores)
     IDs_df <- foreach(i = 1:length(speciesID), .packages = c("data.table", "dplyr")) %dopar% { # if you dont add any combine argument it will return a list
       x <- hcaf[hcaf$SpeciesID == speciesID[i],]
@@ -71,13 +69,24 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, ...) { # filter by 
       IDs_df[[i]] <- z
     }
     stopCluster(cl)
-    # write list elements (speciesID)
+    
+    # 
+    if(data == "species") { # write list elements (speciesID)
       for(j in 1:length(IDs_df)) {
         name.csv <- paste(speciesID[j], olayer, sep = "_")
         write.csv(IDs_df[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
         print(paste0(j, " of ", length(speciesID)))
       }
-    return(IDs_df)
+    } else if (data == "richness") { # write a unique data.frame for total richness
+      sp_richness <- do.call(rbind, IDs_df)
+        sp_richness <- sp_richness %>% group_by(CenterLat, CenterLong) %>% summarise(richness = n()) %>% data.frame()
+      write.csv(sp_richness, paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
+    } else {
+      IDs_df <- IDs_df
+    }
+    
+    ifelse(data == "species", return(IDs_df), 
+           ifelse(data == "richness", return(sp_richness), IDs_df))
 }
   
   
