@@ -44,16 +44,16 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, ...) { # add 
   
   # Filtering by layers before loops
   if(olayer == "surface") {
-    hspen_v2 <- hspen %>% filter(DepthPrefMax >= 0 & DepthPrefMax < 200)
-  } else if (olayer == "mesopelagic") {
-    hspen_v2 <- hspen %>% filter(DepthPrefMax >= 200 & DepthPrefMax < 1000)
-  } else if (olayer == "bathypelagic") {
-    hspen_v2 <- hspen %>% filter(DepthPrefMax >= 1000 & DepthPrefMax < 4000)
-  } else if (olayer == "abyssopelagic") {
-    hspen_v2 <- hspen %>% filter(DepthPrefMax >= 4000)
-  } else {
-    hspen_v2 <- hspen
-  }
+      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 0 & DepthPrefMin < 200 & DepthPrefMax >= 0 & DepthPrefMax < 200)
+    } else if (olayer == "mesopelagic") {
+      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 200 & DepthPrefMin < 1000 & DepthPrefMax >= 200 & DepthPrefMax < 1000)
+    } else if (olayer == "bathypelagic") {
+      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 1000 & DepthPrefMin < 4000 & DepthPrefMax >= 1000 & DepthPrefMax < 4000)
+    } else if (olayer == "abyssopelagic") {
+      hspen_v2 <- hspen %>% filter(DepthPrefMin >= 4000 & DepthPrefMax >= 4000)
+    } else {
+      hspen_v2 <- hspen
+    }
     speciesID <- hspen_v2$SpeciesID # how many species?
     IDs_df <- vector("list", length(speciesID)) # create  vector to allocate results
   # Set up parallel structure
@@ -75,17 +75,17 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, ...) { # add 
         name.csv <- paste(speciesID[j], olayer, sep = "_")
         write.csv(IDs_df[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
         print(paste0(j, " of ", length(speciesID)))
+        return(IDs_df)
+        }
+      } else if (data == "richness") { # write a unique data.frame for total richness
+        sp_richness <- do.call(rbind, IDs_df)
+          sp_richness <- sp_richness %>% group_by(CenterLat, CenterLong) %>% summarise(richness = n()) %>% data.frame()
+        name.csv <- paste("spp_richness", olayer, sep = "_")
+        write.csv(sp_richness, paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
+        return(sp_richness)
+      } else {
+        return(IDs_df)
       }
-    } else if (data == "richness") { # write a unique data.frame for total richness
-      sp_richness <- do.call(rbind, IDs_df)
-        sp_richness <- sp_richness %>% group_by(CenterLat, CenterLong) %>% summarise(richness = n()) %>% data.frame()
-      name.csv <- paste("spp_richness", olayer, sep = "_")
-      write.csv(sp_richness, paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-    } else {
-      IDs_df <- IDs_df
-    }
-    ifelse(data == "species", return(IDs_df), 
-           ifelse(data == "richness", return(sp_richness), IDs_df))
 }
   
   
