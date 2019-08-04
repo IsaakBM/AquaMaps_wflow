@@ -72,10 +72,9 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, ...) { # add 
   # Defining outcome
     if(data == "species") { # write list elements (speciesID)
       for(j in 1:length(IDs_df)) {
-        name.csv <- paste(speciesID[j], olayer, sep = "_")
+        name.csv <- paste(IDs_df[[j]][1,1], olayer, sep = "_")
         write.csv(IDs_df[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-        print(paste0(j, " of ", length(speciesID)))
-        return(IDs_df)
+        print(paste0(j, " of ", length(IDs_df)))
         }
       } else if (data == "richness") { # write a unique data.frame for total richness
         sp_richness <- do.call(rbind, IDs_df)
@@ -86,6 +85,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, ...) { # add 
       } else {
         return(IDs_df)
       }
+      return(IDs_df)
 }
   
   
