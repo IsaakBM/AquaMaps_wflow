@@ -58,14 +58,14 @@ aqua_rs <- function(path, bathymetry_shp, olayer) { # kill the cells that are no
   
   # 3. Match Bathymetry and species raster distributions spatial resolution
   rs_final <- vector("list", length(rs_list))
-  for (j in 1:length(rs_list)) {
-    # single <- subset(rs_list[[j]])    
-    rs_final[[j]] <- mask(rs_list[[j]], resample(bathy, rs_list[[j]], resample = "bilinear"))
-    print(paste0(j, " of ", length(rs_list)))
-    
-    # name.csv <- paste(IDs_df[[j]][1,1], olayer, sep = "_")
-    # writeRaster(IDs_df[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-    # print(paste0(j, " of ", length(IDs_df)))
-  }
+    for (j in 1:length(rs_list)) {
+      if(length(rs_list[[j]]) != 0) { # in case we have a NULL element in a list (species with only 1 cell)
+        rs_final[[j]] <- mask(rs_list[[j]], resample(bathy, rs_list[[j]], resample = "bilinear"))
+        print(paste0(j, " of ", length(rs_list)))  
+      }
+      # name.csv <- paste(IDs_df[[j]][1,1], olayer, sep = "_")
+      # writeRaster(IDs_df[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
+      # print(paste0(j, " of ", length(IDs_df)))
+    }
   return(rs_final)
 }
