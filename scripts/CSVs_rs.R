@@ -35,6 +35,7 @@ aqua_rs <- function(path, bathymetry_shp, olayer) { # kill the cells that are no
     rs_list <- foreach(i = 1:length(files_csv), .packages = c("dplyr", "raster")) %dopar% {
       single <- read.csv(files_csv[i])
       if(nrow(single) > 1) { # some species have only 1 cell (avoid them)
+        # here create the global raster to mask the element
         rs_list[[i]] <- rasterFromXYZ(as.data.frame(single)[, c("CenterLong", "CenterLat", "probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax")])   
       }
     } 
@@ -57,15 +58,20 @@ aqua_rs <- function(path, bathymetry_shp, olayer) { # kill the cells that are no
     }
   
   # 3. Match Bathymetry and species raster distributions spatial resolution
-  rs_final <- vector("list", length(rs_list))
-    for (j in 1:length(rs_list)) {
-      if(length(rs_list[[j]]) != 0) { # in case we have a NULL element in a list (species with only 1 cell)
-        rs_final[[j]] <- mask(rs_list[[j]], resample(bathy, rs_list[[j]], resample = "bilinear"))
-        print(paste0(j, " of ", length(rs_list)))  
+    rs_final <- vector("list", length(rs_list))
+    # Creating a projected 0.5 deg raster
+    rs <- raster(ncol = 720, nrow = 360)
+    rs[] <- 1:ncell(n)
+      for (j in 1:length(rs_list)) {
+        if(length(rs_list[[j]]) != 0) { # in case we have a NULL element in a list (species with only 1 cell)
+          # constrain cells 
+          single <- mask(rs_list[[j]], resample(bathy, rs_list[[j]], resample = "bilinear")) # the second argument just one time at first before loop
+          rs_final[[j]] <- resample(single, rs, resample = "bilinear") # projecting raster 0.5 deg
+          print(paste0(j, " of ", length(rs_list)))  
+        }
+        # name.csv <- paste(IDs_df[[j]][1,1], olayer, sep = "_")
+        # writeRaster(IDs_df[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
+        # print(paste0(j, " of ", length(IDs_df)))
       }
-      # name.csv <- paste(IDs_df[[j]][1,1], olayer, sep = "_")
-      # writeRaster(IDs_df[[j]], paste(outdir, name.csv, ".csv", sep = ""), row.names = FALSE)
-      # print(paste0(j, " of ", length(IDs_df)))
-    }
   return(rs_final)
 }
