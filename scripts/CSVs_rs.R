@@ -61,7 +61,8 @@ aqua_rs <- function(path, bathymetry_shp, olayer) { # kill the cells that are no
     rs_final <- vector("list", length(rs_list))
     # Creating a projected 0.5 deg raster
     rs <- raster(ncol = 720, nrow = 360)
-    rs[] <- 1:ncell(n)
+    rs[] <- 1:ncell(rs)
+      # Loop
       for (j in 1:length(rs_list)) {
         if(length(rs_list[[j]]) != 0) { # in case we have a NULL element in a list (species with only 1 cell)
           # constrain cells 
