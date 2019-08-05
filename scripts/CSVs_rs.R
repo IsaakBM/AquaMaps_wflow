@@ -5,9 +5,8 @@
 
 # AIM: Function that reads a AquaMaps .csv files and returns rasters? by species
 # path: directory of AquaMaps species .csv files
-# outdir: where to put the raster species files
+# outdir: 
 # olayer: species from which ocean layer to overlap with bathymetry shapefile
-# resolution: upscale or downscale?
 # bathymetry_shp: a bathymetry shapefile to constrain species cells (ETOPO dataset)
 
 # Input Files
@@ -36,7 +35,8 @@ aqua_rs <- function(path, bathymetry_shp, olayer) { # kill the cells that are no
       single <- read.csv(files_csv[i])
       if(nrow(single) > 1) { # some species have only 1 cell (avoid them)
         # here create the global raster to mask the element
-        rs_list[[i]] <- rasterFromXYZ(as.data.frame(single)[, c("CenterLong", "CenterLat", "probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax")])   
+        rs_list[[i]] <- rasterFromXYZ(as.data.frame(single)[, c("CenterLong", "CenterLat", "probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax")])
+        # missing to add if you want richness
       }
     } 
   
