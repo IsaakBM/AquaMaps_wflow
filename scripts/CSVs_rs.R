@@ -71,6 +71,15 @@ aqua_rs <- function(path, bathymetry_shp, olayer) { # kill the cells that are no
           rs_final[[j]] <- resample(single, rs, resample = "bilinear") # projecting raster 0.5 deg
         }
       }
+      stopCluster(cl)
+  # 4. Writing rasters (not enogh memory will create an error with temporal raster files)
+    for(k in 1:length(rs_final)) {
+      if(length(rs_final[[k]]) != 0) {
+        name.rs <- paste(read.csv(files_csv[k])[1,1], olayer, sep = "_")
+        writeRaster(rs_final[[k]], paste(outdir, name.rs, ".grd", sep = ""), overwrite = TRUE)
+        print(paste0(k, " of ", length(rs_final)))
+      }
+    }
   return(rs_final)
 }
 
