@@ -14,7 +14,7 @@
 # 2. 
 # 3. 
 
-aqua_rs <- function(path, bathymetry_shp, olayer) { # kill the cells that are not according with the bathymetry... 
+aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells that are not according with the bathymetry... 
   
   library(dplyr)
   library(raster)
@@ -72,7 +72,7 @@ aqua_rs <- function(path, bathymetry_shp, olayer) { # kill the cells that are no
         }
       }
       stopCluster(cl)
-  # 4. Writing rasters (not enogh memory will create an error with temporal raster files)
+  # 4. Writing rasters (not enough memory will create an error with temporal raster files)
     for(k in 1:length(rs_final)) {
       if(length(rs_final[[k]]) != 0) {
         name.rs <- paste(read.csv(files_csv[k])[1,1], olayer, sep = "_")
