@@ -5,14 +5,10 @@
 
 # AIM: Function that reads a AquaMaps .csv files and returns rasters? by species
 # path: directory of AquaMaps species .csv files
-# outdir: 
+# outdir: where to put the .csv species files
 # olayer: species from which ocean layer to overlap with bathymetry shapefile
 # bathymetry_shp: a bathymetry shapefile to constrain species cells (ETOPO dataset)
 
-# Input Files
-# 1. 
-# 2. 
-# 3. 
 
 aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells that are not according with the bathymetry... 
   
