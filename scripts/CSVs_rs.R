@@ -9,6 +9,7 @@
 # olayer: species from which ocean layer to overlap with bathymetry shapefile
 # bathymetry_shp: a bathymetry shapefile to constrain species cells (ETOPO dataset)
 
+# ADD DATA (SPECIES OR RICHNESS) ARGUMENT (THIS WILL NOT WORK FOR RICHNESS BECAUSE YOU WILL NOT HAVE IN .CVS TEM, SALI JUST RICHNESS)
 
 aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells that are not according with the bathymetry... 
   
