@@ -31,6 +31,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, region, ...) 
   
   # Reading input files
     # Create a buffer zone to crop species distribution if the projection is not a world map
+    region <- raster(region) # reading the region file (in this case a raster...). maybe a good idea a shapefile
     ext <- extent(region)
     if (ext@xmin > -180 & ext@xmax < 180 & ext@ymin > -90 & ext@ymax < 90) {
       buff <- c(ext@xmin-2, ext@xmax+2, ext@ymin-2, ext@ymax+2) # create a buffer zone (just in case!)
