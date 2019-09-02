@@ -4,7 +4,7 @@
 # Caveat Emptor!
 
 # AIM: Function that reads a AquaMaps files and returns .csv species files
-# path: directory of aquampas.csv files
+# path: folder's name where aquampas.csv files are located
 # outdir: where to put the .csv species files
 # olayer: for what ocean layer do you want the species
 # data: by species or richness?
@@ -23,9 +23,9 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, ...) { # add 
   library(doParallel)
   
   # file's names
-  dir <- dir(path, pattern = ".csv")
-  first_csv <- paste(path, dir[2], sep = "")
-  second_csv <- paste(path, dir[3], sep = "")
+  dir <- path
+  first_csv <- list.files(path = dir, pattern = "*hcaf.*.csv$", full.names = TRUE)
+  second_csv <- list.files(path = dir, pattern = "*hspen.*.csv$", full.names = TRUE)
   
   # Reading input files
   hcaf <- fread(first_csv) %>% 
