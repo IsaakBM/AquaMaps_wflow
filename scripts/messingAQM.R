@@ -8,7 +8,8 @@
 # outdir: where to put the .csv species files
 # olayer: for what ocean layer do you want the species
 # data: by species or richness?
-# region: a raster (or shapefile) of your regions of interest.
+# region: a raster (or shapefile) of your region of interest. If you don't know how, just load a global raster or shapefile and then use 
+# the interactive drawExtent() function to get a new crop raster (or shapefile). The use this object in region argument to rin the function
 
 # Input Files
 # 1. species information (e.g. species ID, taxonomy, "reviewed" or not, but without spatial information)  = hcaf.csv
