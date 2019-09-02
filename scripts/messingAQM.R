@@ -19,6 +19,7 @@
 
 aqua_start <- function(path, outdir, olayer, prob_threshold, data, region, ...) { # add species by species or richness?
   
+  library(raster)
   library(data.table)
   library(dplyr)
   library(foreach)
@@ -38,7 +39,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, region, ...) 
       hcaf <- fread(first_csv) %>% 
         dplyr::select(SpeciesID, CenterLat, CenterLong, probability) %>% 
         dplyr::filter(probability >= prob_threshold) %>% 
-        dplyr::filter(CenterLat >= buff@ymin & CenterLat <= buff@ymax & CenterLong >= buff@xmin & CenterLong <= buff@xmax)
+        dplyr::filter(CenterLat >= buff[3] & CenterLat <= buff[4] & CenterLong >= buff[1] & CenterLong <= buff[2])
     } else {
       hcaf <- fread(first_csv) %>% 
         dplyr::select(SpeciesID, CenterLat, CenterLong, probability) %>% 
