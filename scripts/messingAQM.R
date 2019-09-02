@@ -8,6 +8,7 @@
 # outdir: where to put the .csv species files
 # olayer: for what ocean layer do you want the species
 # data: by species or richness?
+# region: a raster (or shapefile) of your regions of interest.
 
 # Input Files
 # 1. species information (e.g. species ID, taxonomy, "reviewed" or not, but without spatial information)  = hcaf.csv
@@ -15,7 +16,7 @@
 # 3. a lookup table of which species are found in each half-degree cell (and the "probability of occurrence" of that species in that cell)   = cell.csv
 
 
-aqua_start <- function(path, outdir, olayer, prob_threshold, data, ...) { # add species by species or richness?
+aqua_start <- function(path, outdir, olayer, prob_threshold, data, region, ...) { # add species by species or richness?
   
   library(data.table)
   library(dplyr)
@@ -28,12 +29,23 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, ...) { # add 
   second_csv <- list.files(path = dir, pattern = "*hspen.*.csv$", full.names = TRUE)
   
   # Reading input files
-  hcaf <- fread(first_csv) %>% 
-    dplyr::select(SpeciesID, CenterLat, CenterLong, probability) %>% 
-    dplyr::filter(probability >= prob_threshold) # or == probability
-    # [1] "SpeciesID"   "CsquareCode"
-    # [3] "probability" "CenterLat"  
-    # [5] "CenterLong"  "LOICZID" 
+    # Create a buffer zone to crop species distribution if the projection is not a world map
+    ext <- extent(region)
+    if (ext@xmin > -180 & ext@xmax < 180 & ext@ymin > -90 & ext@ymax < 90) {
+      buff <- c(ext@xmin-2, ext@xmax+2, ext@ymin-2, ext@ymax+2) # create a buffer zone (just in case!)
+      hcaf <- fread(first_csv) %>% 
+        dplyr::select(SpeciesID, CenterLat, CenterLong, probability) %>% 
+        dplyr::filter(probability >= prob_threshold) %>% 
+        dplyr::filter(CenterLat >= buff@ymin & CenterLat <= buff@ymax & CenterLong >= buff@xmin & CenterLong <= buff@xmax)
+    } else {
+      hcaf <- fread(first_csv) %>% 
+        dplyr::select(SpeciesID, CenterLat, CenterLong, probability) %>% 
+        dplyr::filter(probability >= prob_threshold)
+        # [1] "SpeciesID"   "CsquareCode"
+        # [3] "probability" "CenterLat"  
+        # [5] "CenterLong"  "LOICZID"
+    }
+  
   hspen <- fread(second_csv) %>% 
     dplyr::select(c(2:16)) # SpeciesID + DepthEnvelope + tempEnvelop + SalinityEnvelope
     # "SpeciesID"  
