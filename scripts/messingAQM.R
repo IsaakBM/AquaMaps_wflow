@@ -9,7 +9,7 @@
 # olayer: for what ocean layer do you want the species
 # data: by species or richness?
 # region: a raster (or shapefile) of your region of interest. If you don't know how, just load a global raster or shapefile and then use 
-# the interactive drawExtent() function to get a new crop raster (or shapefile). The use this object in region argument to rin the function
+  # the interactive drawExtent() function to get a new crop raster (or shapefile). The use this object in region argument to rin the function
 
 # Input Files
 # 1. species information (e.g. species ID, taxonomy, "reviewed" or not, but without spatial information)  = hcaf.csv
@@ -49,13 +49,13 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, region, ...) 
         # [5] "CenterLong"  "LOICZID"
     }
   
-  hspen <- fread(second_csv) %>% 
-    dplyr::select(c(2:16)) # SpeciesID + DepthEnvelope + tempEnvelop + SalinityEnvelope
-    # "SpeciesID"  
-    # "DepthMin" "DepthPrefMin" "DepthPrefMax" "DepthMax" "MeanDepth"
-    # "Pelagic"
-    # "TempMin" "TempPrefMin" "TempPrefMax" "TempMax"
-    # "SalinityMin" "SalinityPrefMin" "SalinityPrefMax" "SalinityMax"
+    hspen <- fread(second_csv) %>% 
+      dplyr::select(c(2:16)) # SpeciesID + DepthEnvelope + tempEnvelop + SalinityEnvelope
+      # "SpeciesID"  
+      # "DepthMin" "DepthPrefMin" "DepthPrefMax" "DepthMax" "MeanDepth"
+      # "Pelagic"
+      # "TempMin" "TempPrefMin" "TempPrefMax" "TempMax"
+      # "SalinityMin" "SalinityPrefMin" "SalinityPrefMax" "SalinityMax"
   
   # Filtering by layers before loops
   if(olayer == "surface") {

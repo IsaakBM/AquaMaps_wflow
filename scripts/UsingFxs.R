@@ -35,6 +35,7 @@ rs4 <- drawExtent()
 rs3 <- crop(rs, rs4)
 writeRaster(rs3, "rasters/etopos_mediterranean.grd")
 mediterranean <- raster("rasters/etopos_mediterranean.grd")
+plot(mediterranean)
 
 surface_sppMed_csv <- aqua_start(path = "AquaMaps", outdir = "CSVs/", olayer = "surface", prob_threshold = 0.4, 
                              data = "richness", region = "rasters/etopos_mediterranean.grd")
@@ -51,6 +52,9 @@ plot(b)
 wb <- st_read("shapefiles/WorldBorders/TM_WORLD_BORDERS-0.3.shp")
 wb_sp <- as(wb, "Spatial")
 
+pdf("pdfs/richness_surface_sspMed.pdf", width = 38, height = 20)
 plot(b)
-plot(wb_sp, add = TRUE)
+plot(wb_sp, add = TRUE, col = "gray54")
+dev.off()
+
 
