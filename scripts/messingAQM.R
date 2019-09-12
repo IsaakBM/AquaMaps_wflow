@@ -19,11 +19,13 @@
 
 aqua_start <- function(path, outdir, olayer, prob_threshold, data, region, ...) { # add species by species or richness?
   
-  library(raster)
-  library(data.table)
-  library(dplyr)
-  library(foreach)
-  library(doParallel)
+  # List of pacakges that we will use
+    list.of.packages <- c("raster", "data.table", "dplyr", "foreach", "doParallel")
+    # Load packages
+      lapply(list.of.packages, library, character.only = TRUE)
+      # If is not installed, install the pacakge
+        new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])] # is the package in MY list of packages
+        if(length(new.packages)) install.packages(new.packages) # if not, installed
   
   # file's names
   dir <- path
