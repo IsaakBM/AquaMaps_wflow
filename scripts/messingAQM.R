@@ -19,13 +19,13 @@
 
 aqua_start <- function(path, outdir, olayer, prob_threshold, data, region, ...) { # add species by species or richness?
   
-  library(raster, lib.loc = "R/x86_64-pc-linux-gnu-library/3.5/")
-  library(data.table, lib.loc = "R/x86_64-pc-linux-gnu-library/3.5/")
-  library(dplyr, lib.loc = "R/x86_64-pc-linux-gnu-library/3.5/")
-  library(rlang, lib.loc = "R/x86_64-pc-linux-gnu-library/3.5/")
-  library(Rcpp, lib.loc = "R/x86_64-pc-linux-gnu-library/3.5/")
-  library(foreach, lib.loc = "R/x86_64-pc-linux-gnu-library/3.5/")
-  library(doParallel, lib.loc = "R/x86_64-pc-linux-gnu-library/3.5/")
+  library(raster, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
+  library(data.table, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
+  library(dplyr, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
+  library(rlang, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
+  library(Rcpp, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
+  library(foreach, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
+  library(doParallel, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
   
   # List of pacakges that we will use
     # list.of.packages <- c("raster", "data.table", "dplyr", "foreach", "doParallel")
