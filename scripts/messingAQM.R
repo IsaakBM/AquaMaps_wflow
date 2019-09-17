@@ -26,6 +26,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, region, ...) 
   library(Rcpp, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
   library(foreach, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
   library(doParallel, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
+  # homes/uqibrito/.R/library/rlang/libs (new library set up)
   
   # List of pacakges that we will use
     # list.of.packages <- c("raster", "data.table", "dplyr", "foreach", "doParallel")
