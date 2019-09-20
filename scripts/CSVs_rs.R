@@ -15,7 +15,7 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
   
   library(dplyr)
   library(raster)
-  library(sf)
+  # library(sf)
   library(foreach)
   library(doParallel)
   
@@ -61,7 +61,7 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
     # Parallel Loop
-      rs_final <- foreach(j  = 1:length(rs_list), .packages = c("raster", "dplyr", "sf")) %dopar% {
+      rs_final <- foreach(j  = 1:length(rs_list), .packages = c("raster", "dplyr")) %dopar% {
         if(length(rs_list[[j]]) != 0) { # in case we have a NULL element in a list (species with only 1 or <= 10 cells)
           # constrain cells 
           single <- mask(rs_list[[j]], resample(bathy, rs_list[[j]], resample = "bilinear"))
@@ -79,4 +79,8 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
     }
   return(rs_final)
 }
+
+
+
+
 
