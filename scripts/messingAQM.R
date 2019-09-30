@@ -19,22 +19,13 @@
 
 aqua_start <- function(path, outdir, olayer, prob_threshold, data, region, ...) { # add species by species or richness?
   
-  library(raster, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
-  library(data.table, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
-  library(dplyr, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
-  library(rlang, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
-  library(Rcpp, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
-  library(foreach, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
-  library(doParallel, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
-  # homes/uqibrito/.R/library/rlang/libs (new library set up)
-  
   # List of pacakges that we will use
-    # list.of.packages <- c("raster", "data.table", "dplyr", "foreach", "doParallel")
+    list.of.packages <- c("raster", "data.table", "dplyr", "foreach", "doParallel")
     # Load packages
       lapply(list.of.packages, library, character.only = TRUE)
       # If is not installed, install the pacakge
-        # new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])] # is the package in MY list of packages
-        # if(length(new.packages)) install.packages(new.packages) # if not, installed
+        new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])] # is the package in MY list of packages
+        if(length(new.packages)) install.packages(new.packages) # if not, installed
   
   # file's names
   dir <- path
@@ -113,5 +104,14 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, region, ...) 
       }
       return(IDs_df)
 }
+
+system.time(aqua_start(path = "AquaMaps",
+                       outdir = "CSVs/",
+                       olayer = "surface",
+                       prob_threshold = 0.4,
+                       data = "species",
+                       region = "ETOPO1_05deg/etopos_mediterranean.grd"))
+
+
   
   
