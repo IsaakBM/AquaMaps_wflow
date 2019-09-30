@@ -52,7 +52,7 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
       # Parallel Loop
         rs_final <- foreach(j  = 1:length(files_csv), .packages = c("raster", "dplyr")) %dopar% {
           single <- read.csv(files_csv[j])
-          if(nrow(single) > 1) { 
+          if(nrow(single) >= 4 & mean(single$CenterLat) != (single$CenterLat[1])) { 
             rs1 <- rasterFromXYZ(as.data.frame(single) 
                                  [, c("CenterLong", "CenterLat", "probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax")])
               rs1 <- mask(rs1, resample(bathy, rs1, resample = "bilinear"))
@@ -60,11 +60,13 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
             }
             }
             stopCluster(cl)
+        names(rs_final) <- lapply(files_csv, FUN = function(x) strsplit(basename(x), "_")[[1]][[1]])
+        rs_final <- rs_final[lapply(rs_final, length) > 0]
   
     # 4. Writing rasters (not enough memory will create an error with temporal raster files)
       for(k in 1:length(rs_final)) {
         if(length(rs_final[[k]]) != 0) {
-          name.rs <- paste(read.csv(files_csv[k])[1,1], olayer, sep = "_")
+          name.rs <- paste(names(rs_final[i]), olayer, sep = "_")
           writeRaster(rs_final[[k]], paste(outdir, name.rs, ".grd", sep = ""), overwrite = TRUE)
           print(paste0(k, " of ", length(rs_final)))
           }
