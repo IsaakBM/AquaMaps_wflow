@@ -66,7 +66,7 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
     # 4. Writing rasters (not enough memory will create an error with temporal raster files)
       for(k in 1:length(rs_final)) {
         if(length(rs_final[[k]]) != 0) {
-          name.rs <- paste(names(rs_final[i]), olayer, sep = "_")
+          name.rs <- paste(names(rs_final[k]), olayer, sep = "_")
           writeRaster(rs_final[[k]], paste(outdir, name.rs, ".grd", sep = ""), overwrite = TRUE)
           print(paste0(k, " of ", length(rs_final)))
           }
