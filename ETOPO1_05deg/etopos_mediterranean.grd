@@ -1,0 +1,26 @@
+[general]
+creator=R package 'raster'
+created=2019-09-30 11:58:40
+[georeference]
+nrows=32
+ncols=97
+xmin=-11.5
+ymin=30.5
+xmax=37
+ymax=46.5
+projection=+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0
+[data]
+datatype=FLT4S
+byteorder=little
+nbands=1
+bandorder=BIL
+categorical=FALSE
+minvalue=-5066.9140625
+maxvalue=0
+nodatavalue=-3.4e+38
+[legend]
+legendtype=
+values=
+color=
+[description]
+layername=ETOPO1_Ice_g_geotiff
