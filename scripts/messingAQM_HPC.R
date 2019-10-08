@@ -119,11 +119,11 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, data, region, ...) 
       return(IDs_df)
 }
 
-system.time(abysso_spp_csv <- aqua_start(path = "/30days/uqibrito/AquaMaps_wflow/AquaMaps",
-                                         outdir = "/30days/uqibrito/AquaMaps_wflow/CSVs/",
-                                         olayer = "mesopelagic",
-                                         prob_threshold = 0.4,
-                                         data = "species",
-                                         region = "/30days/uqibrito/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd"))
+system.time(aqua_start(path = "/30days/uqibrito/AquaMaps_wflow/AquaMaps",
+                       outdir = "/30days/uqibrito/AquaMaps_wflow/CSVs/",
+                       olayer = "mesopelagic",
+                       prob_threshold = 0.4,
+                       data = "species",
+                       region = "/30days/uqibrito/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd"))
   
   
