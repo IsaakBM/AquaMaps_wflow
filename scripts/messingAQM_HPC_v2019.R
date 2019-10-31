@@ -130,7 +130,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
     write.csv(speciesInfo, paste(outdir, name.sum, ".csv", sep = ""), row.names = FALSE)
 }
 
-system.time(aqua_start(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/AquaMaps/v2019\(preliminary\)",
+system.time(aqua_start(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/AquaMaps/v2019a",
                        outdir = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/CSVs/",
                        olayer = "mesopelagic",
                        prob_threshold = 0.5,
