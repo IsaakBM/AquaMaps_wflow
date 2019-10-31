@@ -52,7 +52,7 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
       # Parallel Loop
         rs_final <- foreach(j  = 1:length(files_csv), .packages = c("raster", "dplyr")) %dopar% {
           single <- read.csv(files_csv[j])
-          if(nrow(single) >= 4 & mean(single$CenterLat) != (single$CenterLat[1])) { 
+          if(nrow(single) >= 10 & mean(single$CenterLat) != (single$CenterLat[1])) { 
             rs1 <- rasterFromXYZ(as.data.frame(single) 
                                  [, c("CenterLong", "CenterLat", "probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax")])
               rs1 <- mask(rs1, resample(bathy, rs1, resample = "bilinear"))
@@ -78,22 +78,3 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
 #                     outdir = "/30days/uqibrito/AquaMaps_wflow/rasters/01_surface/",
 #                     bathymetry_shp = "/30days/uqibrito/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd",
 #                     olayer = "surface"))
-
-# slr_job <- slurm_apply(aqua_rs(path = "/30days/uqibrito/AquaMaps_wflow/CSVs/01_surface",
-#                                outdir = "/30days/uqibrito/AquaMaps_wflow/rasters/01_surface/",
-#                                bathymetry_shp = "/30days/uqibrito/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd",
-#                                olayer = "surface"), 
-#                        params, 
-#                        jobname = NA, 
-#                        nodes = 5, 
-#                        cpus_per_node = 20, 
-#                        add_objects = NULL, 
-#                        pkgs = rev(.packages()), 
-#                        libPaths = NULL, 
-#                        slurm_options = list(), 
-#                        submit = TRUE)
-
-
-
-
-
