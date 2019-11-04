@@ -97,8 +97,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
     speciesID <- hspen_v2$SpeciesID # how many species?
     IDs_df <- vector("list", length(speciesID)) # create  vector to allocate results
   # Set up parallel structure
-    cores  <-  detectCores()
-    ncores <- cores -1 
+    ncores <- 20 
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
     # Loops (~34 minutes with 11 cores)
@@ -132,21 +131,21 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
     write.csv(speciesInfo, paste(outdir, name.sum, ".csv", sep = ""), row.names = FALSE)
 }
 
-system.time(aqua_start(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/AquaMaps/v2019a",
-                       outdir = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/CSVs/",
-                       olayer = "mesopelagic",
-                       prob_threshold = 0.5,
-                       sp_env = 1,
-                       data = "species",
-                       region = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd"))
-
-# system.time(aqua_start(path = "AquaMaps/v2019a",
-#                        outdir = "CSVs/",
-#                        olayer = "abyssopelagic",
-#                        prob_threshold = 0.5, 
+# system.time(aqua_start(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/AquaMaps/v2019a",
+#                        outdir = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/CSVs/",
+#                        olayer = "mesopelagic",
+#                        prob_threshold = 0.5,
 #                        sp_env = 1,
 #                        data = "species",
-#                        region = "ETOPO1_05deg/ETOPO1_ocean.grd"))
+#                        region = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd"))
+
+system.time(aqua_start(path = "AquaMaps/v2019a",
+                       outdir = "CSVs/",
+                       olayer = "abyssopelagic",
+                       prob_threshold = 0.5,
+                       sp_env = 1,
+                       data = "richness",
+                       region = "ETOPO1_05deg/ETOPO1_ocean.grd"))
 
 
 
