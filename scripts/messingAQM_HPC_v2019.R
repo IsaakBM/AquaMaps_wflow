@@ -24,8 +24,10 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
   library(raster)
   library(data.table)
   library(dplyr)
+  library(tidyselect)
   library(foreach)
   library(doParallel)
+  
   # homes/uqibrito/.R/library/rlang/libs (new library set up)
   # library(raster, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
   # library(data.table, lib.loc = "/home/uqibrito/R/x86_64-pc-linux-gnu-library/3.5/")
@@ -69,7 +71,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
     }
   
     hspen <- fread(second_csv) %>% 
-      dplyr::select(matches("Species|Pelagic|Depth|Oxy|Temp|Salinity|Rank")) %>% 
+      dplyr::select(tidyselect::matches("Species|Pelagic|Depth|Oxy|Temp|Salinity|Rank")) %>% 
       dplyr::filter(Rank == sp_env)
       # "SpeciesID"  
       # "DepthMin" "DepthPrefMin" "DepthPrefMax" "DepthMax" "MeanDepth"
@@ -138,7 +140,7 @@ system.time(aqua_start(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/AquaM
                        data = "species",
                        region = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd"))
 
-# system.time(aqua_start(path = "AquaMaps/v2019(preliminary)",
+# system.time(aqua_start(path = "AquaMaps/v2019a",
 #                        outdir = "CSVs/",
 #                        olayer = "abyssopelagic",
 #                        prob_threshold = 0.5, 
