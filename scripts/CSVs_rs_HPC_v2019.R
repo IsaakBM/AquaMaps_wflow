@@ -17,7 +17,6 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
   library(raster)
   library(foreach)
   library(doParallel)
-  library(rslurm)
   
   # 1) .csv files by species
   files_csv <- list.files(path = path, pattern = ".csv", full.names = TRUE)
@@ -73,6 +72,11 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
         }
   return(rs_final)
 }
+
+system.time(aqua_rs(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/CSVs/v2019a/01_surface",
+                    outdir = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/rasters/v2019a/",
+                    bathymetry_shp = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd",
+                    olayer = "surface"))
 
 # system.time(aqua_rs(path = "/30days/uqibrito/AquaMaps_wflow/CSVs/01_surface",
 #                     outdir = "/30days/uqibrito/AquaMaps_wflow/rasters/01_surface/",
