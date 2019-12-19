@@ -51,34 +51,30 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
       # Parallel Loop
         rs_final <- foreach(j  = 1:length(files_csv), .packages = c("raster", "dplyr")) %dopar% {
           single <- read.csv(files_csv[j])
+          ns <- basename(files_csv[j])
+            code <- unlist(lapply(ns, function(x) strsplit(x, "_")[[1]][[1]]))
           if(nrow(single) >= 10 & mean(single$CenterLat) != (single$CenterLat[1])) { 
             rs1 <- rasterFromXYZ(as.data.frame(single) 
-                                 [, c("CenterLong", "CenterLat", "probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax")])
+                                 [, c("CenterLong", "CenterLat", "Probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax")])
               rs1 <- mask(rs1, resample(bathy, rs1, resample = "bilinear"))
-            rs_final[[j]] <- resample(rs1, rs, resample = "bilinear") # projecting raster 0.5 deg
+            rs_final <- resample(rs1, rs, resample = "bilinear") # projecting raster 0.5 deg
+            
+            name.rs <- paste(code, olayer, sep = "_")
+            writeRaster(rs_final, paste(outdir, name.rs, ".grd", sep = ""), overwrite = TRUE)
             }
             }
             stopCluster(cl)
         names(rs_final) <- lapply(files_csv, FUN = function(x) strsplit(basename(x), "_")[[1]][[1]])
         rs_final <- rs_final[lapply(rs_final, length) > 0]
-  
-    # 4. Writing rasters (not enough memory will create an error with temporal raster files)
-      for(k in 1:length(rs_final)) {
-        if(length(rs_final[[k]]) != 0) {
-          name.rs <- paste(names(rs_final[k]), olayer, sep = "_")
-          writeRaster(rs_final[[k]], paste(outdir, name.rs, ".grd", sep = ""), overwrite = TRUE)
-          print(paste0(k, " of ", length(rs_final)))
-          }
-        }
-  return(rs_final)
+  # return(rs_final)
 }
 
-system.time(aqua_rs(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/CSVs/v2019a/01_surface",
-                    outdir = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/rasters/v2019a/",
-                    bathymetry_shp = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd",
-                    olayer = "surface"))
-
-# system.time(aqua_rs(path = "/30days/uqibrito/AquaMaps_wflow/CSVs/01_surface",
-#                     outdir = "/30days/uqibrito/AquaMaps_wflow/rasters/01_surface/",
-#                     bathymetry_shp = "/30days/uqibrito/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd",
+# system.time(aqua_rs(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/CSVs/v2019a/01_surface",
+#                     outdir = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/rasters/v2019a/",
+#                     bathymetry_shp = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd",
 #                     olayer = "surface"))
+
+system.time(aqua_rs(path = "CSVs/01_surface_mediterranean",
+                    outdir = "rasters/01_surface_mediterranean/",
+                    bathymetry_shp = "ETOPO1_05deg/ETOPO1_ocean.grd",
+                    olayer = "surface"))
