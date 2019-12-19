@@ -64,8 +64,6 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
             }
             }
             stopCluster(cl)
-        names(rs_final) <- lapply(files_csv, FUN = function(x) strsplit(basename(x), "_")[[1]][[1]])
-        rs_final <- rs_final[lapply(rs_final, length) > 0]
   # return(rs_final)
 }
 
