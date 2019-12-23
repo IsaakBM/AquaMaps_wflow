@@ -56,7 +56,7 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
           if(nrow(single) >= 10 & mean(single$CenterLat) != (single$CenterLat[1])) { 
             rs1 <- rasterFromXYZ(as.data.frame(single) 
                                  [, c("CenterLong", "CenterLat", "Probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax", "OxyPrefMin", "OxyPrefMax")])
-              rs1 <- mask(rs1, resample(bathy, rs1, resample = "bilinear"))
+              rs1 <- mask(rs1, resample(bathy, rs1, resample = "ngb"))
             rs_final <- resample(rs1, rs, resample = "ngb") # projecting raster 0.5 deg
             
             name.rs <- paste(code, olayer, sep = "_")
@@ -71,7 +71,7 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
 #                     bathymetry_shp = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd",
 #                     olayer = "surface"))
 
-system.time(aqua_rs(path = "CSVs/01_surface_mediterranean",
-                    outdir = "rasters/01_surface_mediterranean/",
-                    bathymetry_shp = "ETOPO1_05deg/ETOPO1_ocean.grd",
+system.time(aqua_rs(path = "/Users/bri273/Desktop/AquaMaps_wflow/CSVs/01_surface_mediterranean",
+                    outdir = "/Users/bri273/Desktop/AquaMaps_wflow/rasters/01_surface_mediterranean/",
+                    bathymetry_shp = "/Users/bri273/Desktop/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd",
                     olayer = "surface"))
