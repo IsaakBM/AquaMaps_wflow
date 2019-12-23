@@ -95,7 +95,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
       hspen_v2 <- hspen
     }
     speciesID <- hspen_v2$SpeciesID # how many species?
-    IDs_df <- list() # vector("list", length(speciesID)) # create  vector to allocate results [leave this open otherwise number wont match]
+    IDs_df <- vector("list", length(speciesID))
   # Set up parallel structure
     ncores <- 20 
     cl <- makeCluster(ncores)
@@ -127,8 +127,9 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
       }
   
   # Summ table with species taxonomic info per ocean layer []
-    speciesInfo <- speciesInfo[speciesInfo$speciesID %in% hspen_v2$SpeciesID,]
-    name.sum <- paste("speciesInfo", olayer, sep = "_")
+    spp_all <- do.call(rbind, IDs_df)
+    speciesInfo <- speciesInfo[speciesInfo$speciesID %in% spp_all$SpeciesID,]
+    name.sum <- paste("01_speciesInfo", olayer, sep = "_")
     write.csv(speciesInfo, paste(outdir, name.sum, ".csv", sep = ""), row.names = FALSE)
     return(IDs_df)
 }
@@ -141,7 +142,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
 #                        data = "species",
 #                        region = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd"))
 
-system.time(test <- aqua_start(path = "AquaMaps/v2019a",
+system.time(aqua_start(path = "AquaMaps/v2019a",
                        outdir = "CSVs/01_surface_mediterranean/",
                        olayer = "surface",
                        prob_threshold = 0.5,
