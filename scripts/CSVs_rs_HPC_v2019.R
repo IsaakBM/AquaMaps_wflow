@@ -45,7 +45,7 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
       rs[] <- 1:ncell(rs)
     # Set up parallel structure
       cores  <-  detectCores()
-      ncores <- cores -1 
+      ncores <- 23
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
       # Parallel Loop
@@ -57,14 +57,13 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
             rs1 <- rasterFromXYZ(as.data.frame(single) 
                                  [, c("CenterLong", "CenterLat", "Probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax")])
               rs1 <- mask(rs1, resample(bathy, rs1, resample = "bilinear"))
-            rs_final <- resample(rs1, rs, resample = "bilinear") # projecting raster 0.5 deg
+            rs_final <- resample(rs1, rs, resample = "ngb") # projecting raster 0.5 deg
             
             name.rs <- paste(code, olayer, sep = "_")
             writeRaster(rs_final, paste(outdir, name.rs, ".grd", sep = ""), overwrite = TRUE)
-            }
-            }
-            stopCluster(cl)
-  # return(rs_final)
+          }
+        }
+        stopCluster(cl)
 }
 
 # system.time(aqua_rs(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/CSVs/v2019a/01_surface",
