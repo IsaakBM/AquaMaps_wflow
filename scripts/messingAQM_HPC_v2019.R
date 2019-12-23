@@ -95,7 +95,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
       hspen_v2 <- hspen
     }
     speciesID <- hspen_v2$SpeciesID # how many species?
-    IDs_df <- vector("list", length(speciesID)) # create  vector to allocate results
+    IDs_df <- list() # vector("list", length(speciesID)) # create  vector to allocate results [leave this open otherwise number wont match]
   # Set up parallel structure
     ncores <- 20 
     cl <- makeCluster(ncores)
@@ -108,6 +108,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
         IDs_df[[i]] <- z
       }
       stopCluster(cl)
+      IDs_df <- IDs_df[lapply(IDs_df, nrow) > 0] # removing empty species from previous list
   # Defining outcome
     if(data == "species") { # write list elements (speciesID)
       for(j in 1:length(IDs_df)) {
@@ -125,10 +126,11 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
         return(IDs_df)
       }
   
-  # Summ table with species taxonomic info per ocean layer
+  # Summ table with species taxonomic info per ocean layer []
     speciesInfo <- speciesInfo[speciesInfo$speciesID %in% hspen_v2$SpeciesID,]
     name.sum <- paste("speciesInfo", olayer, sep = "_")
     write.csv(speciesInfo, paste(outdir, name.sum, ".csv", sep = ""), row.names = FALSE)
+    return(IDs_df)
 }
 
 # system.time(aqua_start(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/AquaMaps/v2019a",
@@ -139,7 +141,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
 #                        data = "species",
 #                        region = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd"))
 
-system.time(aqua_start(path = "AquaMaps/v2019a",
+system.time(test <- aqua_start(path = "AquaMaps/v2019a",
                        outdir = "CSVs/01_surface_mediterranean/",
                        olayer = "surface",
                        prob_threshold = 0.5,
