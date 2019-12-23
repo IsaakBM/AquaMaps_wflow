@@ -142,11 +142,11 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
 #                        data = "species",
 #                        region = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/ETOPO1_05deg/ETOPO1_ocean.grd"))
 
-system.time(aqua_start(path = "AquaMaps/v2019a",
-                       outdir = "CSVs/01_surface_mediterranean/",
+system.time(aqua_start(path = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a",
+                       outdir = "/Users/bri273/Desktop/AquaMaps_wflow/CSVs/01_surface_mediterranean/",
                        olayer = "surface",
                        prob_threshold = 0.5,
                        sp_env = 1,
                        data = "species",
-                       region = "ETOPO1_05deg/etopos_mediterranean.grd"))
+                       region = "/Users/bri273/Desktop/AquaMaps_wflow/ETOPO1_05deg/etopos_mediterranean.grd"))
   
