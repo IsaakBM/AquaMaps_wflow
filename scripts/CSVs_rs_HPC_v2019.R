@@ -55,7 +55,7 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
             code <- unlist(lapply(ns, function(x) strsplit(x, "_")[[1]][[1]]))
           if(nrow(single) >= 10 & mean(single$CenterLat) != (single$CenterLat[1])) { 
             rs1 <- rasterFromXYZ(as.data.frame(single) 
-                                 [, c("CenterLong", "CenterLat", "Probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax")])
+                                 [, c("CenterLong", "CenterLat", "Probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax", "OxyPrefMin", "OxyPrefMax")])
               rs1 <- mask(rs1, resample(bathy, rs1, resample = "bilinear"))
             rs_final <- resample(rs1, rs, resample = "ngb") # projecting raster 0.5 deg
             
