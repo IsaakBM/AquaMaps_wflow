@@ -101,8 +101,8 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
     registerDoParallel(cl)
     # A parallel Loop
       IDs_df <- foreach(i = 1:length(speciesID), .packages = c("raster", "data.table", "dplyr", "magrittr", "sf")) %dopar% { # if you dont add any combine argument it will return a list
-        x <- hcaf[hcaf$SpeciesID == speciesID[i],]
-        y <- hspen_v2[hspen_v2$SpeciesID == speciesID[i],]
+        x <- hcaf[hcaf$SpeciesID == speciesID[700],]
+        y <- hspen_v2[hspen_v2$SpeciesID == speciesID[700],]
         z <- left_join(x = x, y = y, by = "SpeciesID")
         # Consider only species that has more than 10 cells in the study area
           if(nrow(z) >= 10 & mean(z$CenterLat) != (z$CenterLat[1])) {
@@ -118,54 +118,57 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
               rs_final <- subset(rs_final, 1) # here I'm just getting the first layer (Probability) to avoid creating a big object per file.
               if(is.na(rs_final@crs) == TRUE) {crs(rs_final) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")} else {rs_final <- rs_final}
               rs_final <- mask(rs_final, region) # mask the species distribution with the region of interest
-            # Transform AquaMaps species raster into an sf spatial polygon dataframe
-              sd_rs1 <- as(rs_final, "SpatialPolygonsDataFrame")
-              sd_rs1 <- spTransform(sd_rs1, CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")) # just in case!
-              sd_rs1$Probability <- seq(1, length(sd_rs1))
-          # If you want maps by Pacific centred or NOT
-              if(type == "Pacific") {
-                # Define a long & slim polygon that overlaps the meridian line & set its CRS to match that of world
-                  polygon <- st_polygon(x = list(rbind(c(-0.0001, 90),
-                                                       c(0, 90),
-                                                       c(0, -90),
-                                                       c(-0.0001, -90),
-                                                       c(-0.0001, 90)))) %>%
-                    st_sfc() %>%
-                    st_set_crs("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
-                # Transform the species distribution polygon object to a Pacific-centred projection polygon object
-                  sd_rs1_robinson <- sd_rs1 %>% 
-                    st_as_sf() %>% 
-                    st_difference(polygon) %>% 
-                    st_transform(crs = "+proj=robin +lon_0=180 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-                # There is a line in the middle of Antarctica. This is because we have split the map after reprojection. We need to fix this:
-                  bbox1 <-  st_bbox(sd_rs1_robinson)
-                  bbox1[c(1,3)]  <-  c(-1e-5,1e-5)
-                  polygon1 <- st_as_sfc(bbox1)
-                  crosses1 <- sd_rs1_robinson %>%
-                    st_intersects(polygon1) %>%
-                    sapply(length) %>%
-                    as.logical %>%
-                    which
-                # Adding buffer 0
-                  sd_rs1_robinson[crosses1, ] %<>%
-                    st_buffer(0)
-                # Writing the object 
-                  name_sps <- paste(z[1,1], olayer, sep = "_") 
-                  saveRDS(sd_rs1_robinson, paste(outdir, name_sps, ".rds", sep = ""))
-                  IDs_df[[i]] <- rasterToPoints(rs_final) %>% 
-                    as.data.frame()
-                  } else {
-                  # Transform the species distribution polygon object to a Pacific-centred projection polygon object
-                    sd_rs1_robinson <- sd_rs1 %>% 
-                      st_as_sf() %>% 
-                      st_transform(crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
-                  # Writing the object 
-                    name_sps <- paste(z[1,1], olayer, sep = "_") 
-                    saveRDS(sd_rs1_robinson, paste(outdir, name_sps, ".rds", sep = ""))
-                    IDs_df[[i]] <- rasterToPoints(rs_final) %>% 
-                      as.data.frame() 
+              # 
+                if(is.nan(mean(rs_final[], na.rm = TRUE)) == FALSE) {
+                  # Transform AquaMaps species raster into an sf spatial polygon dataframe
+                    sd_rs1 <- as(rs_final, "SpatialPolygonsDataFrame")
+                    sd_rs1 <- spTransform(sd_rs1, CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")) # just in case! # here there is an error... empty object needs to be
+                    sd_rs1$Probability <- seq(1, length(sd_rs1)) 
+                  # If you want maps by Pacific centred or NOT
+                    if(type == "Pacific") {
+                      # Define a long & slim polygon that overlaps the meridian line & set its CRS to match that of world
+                        polygon <- st_polygon(x = list(rbind(c(-0.0001, 90),
+                                                             c(0, 90),
+                                                             c(0, -90),
+                                                             c(-0.0001, -90),
+                                                             c(-0.0001, 90)))) %>%
+                          st_sfc() %>%
+                          st_set_crs("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+                      # Transform the species distribution polygon object to a Pacific-centred projection polygon object
+                        sd_rs1_robinson <- sd_rs1 %>% 
+                        st_as_sf() %>% 
+                        st_difference(polygon) %>% 
+                        st_transform(crs = "+proj=robin +lon_0=180 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+                      # There is a line in the middle of Antarctica. This is because we have split the map after reprojection. We need to fix this:
+                        bbox1 <-  st_bbox(sd_rs1_robinson)
+                        bbox1[c(1,3)]  <-  c(-1e-5,1e-5)
+                        polygon1 <- st_as_sfc(bbox1)
+                        crosses1 <- sd_rs1_robinson %>%
+                          st_intersects(polygon1) %>%
+                          sapply(length) %>%
+                          as.logical %>%
+                          which
+                        # Adding buffer 0
+                          sd_rs1_robinson[crosses1, ] %<>%
+                            st_buffer(0)
+                      # Writing the object 
+                        name_sps <- paste(z[1,1], olayer, sep = "_") 
+                        saveRDS(sd_rs1_robinson, paste(outdir, name_sps, ".rds", sep = ""))
+                        IDs_df[[i]] <- rasterToPoints(rs_final) %>% 
+                          as.data.frame()
+                        } else {
+                          # Transform the species distribution polygon object to a Pacific-centred projection polygon object
+                            sd_rs1_robinson <- sd_rs1 %>% 
+                            st_as_sf() %>% 
+                            st_transform(crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+                          # Writing the object 
+                            name_sps <- paste(z[1,1], olayer, sep = "_") 
+                            saveRDS(sd_rs1_robinson, paste(outdir, name_sps, ".rds", sep = ""))
+                            IDs_df[[i]] <- rasterToPoints(rs_final) %>% 
+                              as.data.frame() 
                   }
               }
+          }
         } # parallel loop ending bracket
       stopCluster(cl)
       IDs_df <- IDs_df[lapply(IDs_df, nrow) > 0] # removing empty species from previous list
