@@ -88,7 +88,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
       } else {
         hspen_v2 <- hspen
       }
-    speciesID <- hspen_v2$SpeciesID # how many species?
+    speciesID <- hspen_v2$SpeciesID [750:850]# how many species?
     IDs_df <- vector("list", length(speciesID))
     
     
@@ -101,8 +101,8 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
     registerDoParallel(cl)
     # A parallel Loop
       IDs_df <- foreach(i = 1:length(speciesID), .packages = c("raster", "data.table", "dplyr", "magrittr", "sf")) %dopar% { # if you dont add any combine argument it will return a list
-        x <- hcaf[hcaf$SpeciesID == speciesID[700],]
-        y <- hspen_v2[hspen_v2$SpeciesID == speciesID[700],]
+        x <- hcaf[hcaf$SpeciesID == speciesID[i],]
+        y <- hspen_v2[hspen_v2$SpeciesID == speciesID[i],]
         z <- left_join(x = x, y = y, by = "SpeciesID")
         # Consider only species that has more than 10 cells in the study area
           if(nrow(z) >= 10 & mean(z$CenterLat) != (z$CenterLat[1])) {
@@ -155,7 +155,9 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
                         name_sps <- paste(z[1,1], olayer, sep = "_") 
                         saveRDS(sd_rs1_robinson, paste(outdir, name_sps, ".rds", sep = ""))
                         IDs_df[[i]] <- rasterToPoints(rs_final) %>% 
-                          as.data.frame()
+                          as.data.frame() %>% 
+                          select(x, y) %>% 
+                          dplyr::mutate(species = z[1,1])
                         } else {
                           # Transform the species distribution polygon object to a Pacific-centred projection polygon object
                             sd_rs1_robinson <- sd_rs1 %>% 
@@ -165,13 +167,15 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
                             name_sps <- paste(z[1,1], olayer, sep = "_") 
                             saveRDS(sd_rs1_robinson, paste(outdir, name_sps, ".rds", sep = ""))
                             IDs_df[[i]] <- rasterToPoints(rs_final) %>% 
-                              as.data.frame() 
+                              as.data.frame() %>% 
+                              select(x, y) %>% 
+                              dplyr::mutate(species = z[1,1])
                   }
               }
           }
         } # parallel loop ending bracket
       stopCluster(cl)
-      IDs_df <- IDs_df[lapply(IDs_df, nrow) > 0] # removing empty species from previous list
+      IDs_df <- IDs_df[!sapply(IDs_df, is.null)] # removing NULL elements from list
       
 ####################################################################################
 ####### 
