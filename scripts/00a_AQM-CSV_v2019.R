@@ -9,6 +9,7 @@
 # olayer: for what ocean layer do you want the species
 # prob_threshold: 
 # sp_env: Species envelope. >= 10 good cells (1) or 3-9 good cells (2). If you want all, write 1|2
+# type: "Pacific" or "Normal"
 # region: a raster (or shapefile) of your region of interest. If you don't know how, just load a global raster or shapefile and then use 
   # the interactive drawExtent() function to get a new crop raster (or shapefile). The use this object in region argument to rin the function
 
@@ -18,7 +19,7 @@
 # 3. a lookup table of which species are found in each half-degree cell (and the "probability of occurrence" of that species in that cell)   = cell.csv
 
 
-aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, region, ...) { # add species by species or richness?
+aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, region, ...) {
   
   library(raster)
   library(data.table)
@@ -165,7 +166,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, region, ...
                       as.data.frame() 
                   }
               }
-        } # for loop ending bracket
+        } # parallel loop ending bracket
       stopCluster(cl)
       IDs_df <- IDs_df[lapply(IDs_df, nrow) > 0] # removing empty species from previous list
       
@@ -197,9 +198,10 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, region, ...
 #                        region = "/QRISdata/Q1216/BritoMorales/Project04b/ETOPO1_05deg/ETOPO1_ocean.grd"))
 
 system.time(aqua_start(path = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a",
-                       outdir = "/Users/bri273/Desktop/AquaMaps_wflow/CSVs/01_surface_mediterranean/",
-                       olayer = "surface",
+                       outdir = "/Users/bri273/Desktop/AquaMaps_wflow/CSVs/04_abyssopelagic_mediterranean/",
+                       olayer = "bathyabyssopelagic",
                        prob_threshold = 0.5,
                        sp_env = 1,
+                       type = "Pacific",
                        region = "/Users/bri273/Desktop/AquaMaps_wflow/ETOPO1_05deg/etopos_mediterranean.grd"))
 
