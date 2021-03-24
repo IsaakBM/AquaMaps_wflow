@@ -178,7 +178,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
       IDs_df <- IDs_df[!sapply(IDs_df, is.null)] # removing NULL elements from list
       
 ####################################################################################
-####### 
+####### Species richness information 
 ####################################################################################
   # Defining outcome
     sp_richness <- data.table::rbindlist(IDs_df, use.names = TRUE)
@@ -228,12 +228,12 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
           st_as_sf() %>% 
           st_transform(crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
         # Writing the object 
-        name_obj <- paste("01_spp-richness", olayer, sep = "_")
-        saveRDS(richness_robinson, paste(outdir, name_obj, ".rds", sep = ""))
+          name_obj <- paste("01_spp-richness", olayer, sep = "_")
+          saveRDS(richness_robinson, paste(outdir, name_obj, ".rds", sep = ""))
     }
     
 ####################################################################################
-####### 
+####### Species taxonomic information
 ####################################################################################
   # Summ table with species taxonomic info per ocean layer
     spp_all <- data.table::rbindlist(IDs_df, use.names = TRUE)
