@@ -131,7 +131,6 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, data, regio
     speciesInfo <- speciesInfo[speciesInfo$speciesID %in% spp_all$SpeciesID,]
     name.sum <- paste("01_speciesInfo", olayer, sep = "_")
     write.csv(speciesInfo, paste(outdir, name.sum, ".csv", sep = ""), row.names = FALSE)
-    return(IDs_df)
 }
 
 # system.time(aqua_start(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/AquaMaps/v2019a",
@@ -149,4 +148,4 @@ system.time(aqua_start(path = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v20
                        sp_env = 1,
                        data = "species",
                        region = "/Users/bri273/Desktop/AquaMaps_wflow/ETOPO1_05deg/etopos_mediterranean.grd"))
-  
+ƒ  

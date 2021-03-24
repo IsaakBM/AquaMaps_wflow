@@ -45,7 +45,7 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
       rs[] <- 1:ncell(rs)
     # Set up parallel structure
       cores  <-  detectCores()
-      ncores <- 23
+      ncores <- cores -1 # set 23 for cluster
       cl <- makeCluster(ncores)
       registerDoParallel(cl)
       # Parallel Loop
@@ -56,7 +56,7 @@ aqua_rs <- function(path, outdir, bathymetry_shp, olayer) { # kill the cells tha
           if(nrow(single) >= 10 & mean(single$CenterLat) != (single$CenterLat[1])) { 
             rs1 <- rasterFromXYZ(as.data.frame(single) 
                                  [, c("CenterLong", "CenterLat", "Probability", "TempPrefMin","TempPrefMax", "SalinityPrefMin","SalinityPrefMax", "OxyPrefMin", "OxyPrefMax")])
-              rs1 <- mask(rs1, resample(bathy, rs1, resample = "ngb"))
+              rs1 <- mask(rs1, resample(bathy, rs1, resample = "ngb")) # match cells with the appropiate bathymetry
             rs_final <- resample(rs1, rs, resample = "ngb") # projecting raster 0.5 deg
             
             name.rs <- paste(code, olayer, sep = "_")
