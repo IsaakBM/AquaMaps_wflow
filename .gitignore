@@ -3,7 +3,4 @@
 .RData
 .Ruserdata
 /AquaMaps
-/rasters
-/figs
-/CSVs
-/shapefiles
+/InputFiles/ETOPO1
