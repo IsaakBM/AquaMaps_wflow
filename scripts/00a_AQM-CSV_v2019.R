@@ -88,7 +88,7 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
       } else {
         hspen_v2 <- hspen
       }
-    speciesID <- hspen_v2$SpeciesID [750:850]# how many species?
+    speciesID <- hspen_v2$SpeciesID # how many species?
     IDs_df <- vector("list", length(speciesID))
     
     
@@ -155,21 +155,21 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
                         name_sps <- paste(z[1,1], olayer, sep = "_") 
                         saveRDS(sd_rs1_robinson, paste(outdir, name_sps, ".rds", sep = ""))
                         IDs_df[[i]] <- rasterToPoints(rs_final) %>% 
-                          as.data.frame() %>% 
-                          select(x, y) %>% 
-                          dplyr::mutate(species = z[1,1])
+                          as.data.frame() %>%
+                          dplyr::select(x, y) %>% 
+                          dplyr::mutate(species = as.character(z[1,1]))
                         } else {
-                          # Transform the species distribution polygon object to a Pacific-centred projection polygon object
-                            sd_rs1_robinson <- sd_rs1 %>% 
+                          # Transform the species distribution polygon object to a common projection polygon object
+                            sd_rs1_latlon <- sd_rs1 %>% 
                             st_as_sf() %>% 
                             st_transform(crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
                           # Writing the object 
                             name_sps <- paste(z[1,1], olayer, sep = "_") 
-                            saveRDS(sd_rs1_robinson, paste(outdir, name_sps, ".rds", sep = ""))
+                            saveRDS(sd_rs1_latlon, paste(outdir, name_sps, ".rds", sep = ""))
                             IDs_df[[i]] <- rasterToPoints(rs_final) %>% 
-                              as.data.frame() %>% 
-                              select(x, y) %>% 
-                              dplyr::mutate(species = z[1,1])
+                              as.data.frame() %>%
+                              dplyr::select(x, y) %>% 
+                              dplyr::mutate(species = as.character(z[1,1]))
                   }
               }
           }
@@ -181,28 +181,67 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
 ####### 
 ####################################################################################
   # Defining outcome
-    sp_richness <- do.call(rbind, IDs_df)
+    sp_richness <- data.table::rbindlist(IDs_df, use.names = TRUE)
       sp_richness <- sp_richness %>% 
         dplyr::group_by(x, y) %>% 
         dplyr::summarise(richness = n()) %>% 
         data.frame()
-      name_obj <- paste("01_spp-richness", olayer, sep = "_")
-      saveRDS(sp_richness, paste(outdir, name_obj, ".rds", sep = ""))
-
-  # Summ table with species taxonomic info per ocean layer []
-    spp_all <- do.call(rbind, IDs_df)
-    speciesInfo <- speciesInfo[speciesInfo$speciesID %in% spp_all$SpeciesID,]
+  # Converting the richness data frame to a raster
+      rs_richness <- rasterFromXYZ(sp_richness)
+      rs_richness_final <- resample(rs_richness, rs, resample = "ngb")
+      if(is.na(rs_richness_final@crs) == TRUE) {crs(rs_richness_final) <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")} else {rs_richness_final <- rs_richness_final}
+  # Transform richness raster to an sf spatial polygon dataframe
+    rs1_richness <- as(rs_richness_final, "SpatialPolygonsDataFrame")
+    rs1_richness <- spTransform(rs1_richness, CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")) # just in case! # here there is an error... empty object needs to be
+    if(type == "Pacific") {
+      # Define a long & slim polygon that overlaps the meridian line & set its CRS to match that of world
+        polygon <- st_polygon(x = list(rbind(c(-0.0001, 90),
+                                             c(0, 90),
+                                             c(0, -90),
+                                             c(-0.0001, -90),
+                                             c(-0.0001, 90)))) %>%
+          st_sfc() %>%
+          st_set_crs("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+      # Transform the species distribution polygon object to a Pacific-centred projection polygon object
+        richness_robinson <- rs1_richness %>% 
+          st_as_sf() %>% 
+          st_difference(polygon) %>% 
+          st_transform(crs = "+proj=robin +lon_0=180 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+      # There is a line in the middle of Antarctica. This is because we have split the map after reprojection. We need to fix this:
+        bbox1 <-  st_bbox(richness_robinson)
+        bbox1[c(1,3)]  <-  c(-1e-5,1e-5)
+        polygon1 <- st_as_sfc(bbox1)
+        crosses1 <- richness_robinson %>%
+          st_intersects(polygon1) %>%
+          sapply(length) %>%
+          as.logical %>%
+          which
+        # Adding buffer 0
+          richness_robinson[crosses1, ] %<>%
+            st_buffer(0)
+        # Writing the object 
+          name_obj <- paste("01_spp-richness", olayer, sep = "_")
+          saveRDS(richness_robinson, paste(outdir, name_obj, ".rds", sep = ""))
+    } else {
+      # Transform the species distribution polygon object to a common projection polygon object
+        richness_latlon <- rs1_richness %>% 
+          st_as_sf() %>% 
+          st_transform(crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+        # Writing the object 
+        name_obj <- paste("01_spp-richness", olayer, sep = "_")
+        saveRDS(richness_robinson, paste(outdir, name_obj, ".rds", sep = ""))
+    }
+    
+####################################################################################
+####### 
+####################################################################################
+  # Summ table with species taxonomic info per ocean layer
+    spp_all <- data.table::rbindlist(IDs_df, use.names = TRUE)
+    speciesInfo <- speciesInfo[speciesInfo$speciesID %in% spp_all$species, ]
     name.sum <- paste("01_speciesInfo", olayer, sep = "_")
     write.csv(speciesInfo, paste(outdir, name.sum, ".csv", sep = ""), row.names = FALSE)
 }
 
-# system.time(aqua_start(path = "/QRISdata/Q1216/BritoMorales/AquaMaps_wflow/AquaMaps/v2019a",
-#                        outdir = "/QRISdata/Q1216/BritoMorales/Project04b/aquamaps_outputs/",
-#                        olayer = "all",
-#                        prob_threshold = 0.5,
-#                        sp_env = 1,
-#                        data = "richness",
-#                        region = "/QRISdata/Q1216/BritoMorales/Project04b/ETOPO1_05deg/ETOPO1_ocean.grd"))
 
 system.time(aqua_start(path = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a",
                        outdir = "/Users/bri273/Desktop/AquaMaps_wflow/CSVs/04_abyssopelagic_mediterranean/",
