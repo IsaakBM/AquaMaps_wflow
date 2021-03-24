@@ -241,13 +241,3 @@ aqua_start <- function(path, outdir, olayer, prob_threshold, sp_env, type, regio
     name.sum <- paste("01_speciesInfo", olayer, sep = "_")
     write.csv(speciesInfo, paste(outdir, name.sum, ".csv", sep = ""), row.names = FALSE)
 }
-
-
-system.time(aqua_start(path = "/Users/bri273/Desktop/AquaMaps_wflow/AquaMaps/v2019a",
-                       outdir = "/Users/bri273/Desktop/AquaMaps_wflow/CSVs/04_abyssopelagic_mediterranean/",
-                       olayer = "bathyabyssopelagic",
-                       prob_threshold = 0.5,
-                       sp_env = 1,
-                       type = "Pacific",
-                       region = "/Users/bri273/Desktop/AquaMaps_wflow/ETOPO1_05deg/etopos_mediterranean.grd"))
-
