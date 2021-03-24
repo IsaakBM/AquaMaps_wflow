@@ -87,12 +87,14 @@ world_robinson[crosses,] %<>%
 
 
 # Creating a empty raster
-rs <- raster(ncol = 360*10, nrow = 180*10) 
+# rs <- raster(ncol = 360*10, nrow = 180*10) 
+rs <- raster(ncol = 360*2, nrow = 180*2) 
 rs[] <- 1:ncell(rs)
 crs(rs) <- CRS(longlat)
 
 # Fasterize the land object
 ocean_rs <- fasterize(ocean_sf, rs)
+writeRaster(ocean_rs, "InputFiles/PacificCentred_05deg/PacificCentred_05deg.tif")
 
 pacific_pol <- as(ocean_rs,  "SpatialPolygonsDataFrame")
 pacific_pol$layer <- seq(1, length(pacific_pol))
