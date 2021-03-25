@@ -11,7 +11,7 @@ source("scripts/00a_AQM-CSV_v2019.R")
 # Run the function
 test01 <- aqua_start(path = "AquaMaps/v2019a",
                      outdir = "RDS/",
-                     olayer = "surface",
+                     olayer = "all",
                      prob_threshold = 0.5,
                      sp_env = 1,
                      type = "Pacific",
@@ -25,20 +25,22 @@ library(RColorBrewer)
 library(ggplot2)
 library(sf)
 
-dt <- readRDS("inp")
+dt <- readRDS("RDS/01_spp-richness_surface.rds")
 final <- dt %>%
-  dplyr::mutate(richness_log = log10(richness))
+  dplyr::mutate(richness_log = log10(richness)) %>% 
   dplyr::mutate(rich_categ = ifelse(richness_log == 0, 1,
                              ifelse(richness_log > 0 & richness_log <= 1, 2,
                              ifelse(richness_log > 1 & richness_log <= 1.69897, 3,
                              ifelse(richness_log > 1.69897 & richness_log <= 2, 4, 
                              ifelse(richness_log > 2 & richness_log <= 2.69897, 5, 
                              ifelse(richness_log > 2.69897 & richness_log <= 3, 6, 7)))))))
-
+st_crs(final) <- "+proj=robin +lon_0=180 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" # just in case...
 # Defining generalities
 pal_rich <- rev(brewer.pal(7, "RdYlBu"))
 cv_rich <- c("1", "1 - 10", "10 - 50", "50 - 100", "100 - 500", "500 - 1000", "> 1000")
 world_sf <- readRDS("InputFiles/WorldPacificCentred/WorldPacificCentred.rds")
+st_crs(world_sf) <- "+proj=robin +lon_0=180 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" # just in case...
+
 # Plotting the figures
 p <- ggplot() +
   geom_sf(data = final, aes(fill = rich_categ), color = NA) +
@@ -48,6 +50,9 @@ p <- ggplot() +
                        limits = c(1, 7),
                        breaks = seq(1, 7, 1),
                        labels = cv_rich) +
+  coord_sf(xlim = "",
+           ylim = "",
+           expand = TRUE) +
   ggsave("Figs/PacificRichness_01.pdf", width = 20, height = 10, dpi = 300)
 
 
