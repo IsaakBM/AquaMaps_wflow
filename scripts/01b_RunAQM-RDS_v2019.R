@@ -25,8 +25,12 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
 ####### 
 ####################################################################################
   #
-    geo.prj <- proj.geo
-    shp_PU_sf <- st_read(pu_shp)
+    if(stringr::str_detect(string = shapefile, pattern = ".rds") == TRUE) {
+      shp_PU_sf <- readRDS(shapefile)
+    } else if (stringr::str_detect(string = shapefile, pattern = ".shp") == TRUE) {
+      shp_PU_sf <- st_read(shapefile)
+    }
+    
     col_ns <- colnames(shp_PU_sf)
     col_ns[1] <- ifelse(col_ns[1] != "layer", "layer", col_ns[1])
     colnames(shp_PU_sf) <- col_ns
@@ -88,10 +92,10 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
   return(PU_list_b)
   }
   
-  system.time(marxan_inputs(path = "shapefiles_rasters/03_MesopelagicLayer_shp",
+  system.time(marxan_inputs(path = "RDS",
                             outdir = "shapefiles_rasters/",
-                            shapefile = "shapefiles_rasters/abnj_03-bathyabysso_global_moll_05deg/abnj_03-bathyabysso_global_moll_05deg.shp",
-                            olayer = "bathyabyssopelagic"))
+                            shapefile = "InputFiles/PUsPacific/PacificABNJGrid_05deg.rds",
+                            olayer = "surface"))
   
   
   
