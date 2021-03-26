@@ -4,17 +4,11 @@
 # Caveat Emptor!
 
 # AIM: Create a general dataframe that would be the core for generate input file for prioritizr analyses (conventional MARXAN)
-# path: folder's name where .grd species rasters files are located
-# outdir: where to put the .csv species files
-# shapefile: a "generic" file that will be use to create planning units (REGION = FALSE) / or a specific shapefile with the planning units  (REGION = TRUE)
-# ncol_pu, nrow_pu: lon and lat resolution of the planning units
-  # raster(ncol = 720, nrow = 360) for 0.5° spatial resolution
-  # raster(ncol = 1440, nrow = 720) for 0.25° spatial resolution
-# raster(ncol = 3600, nrow = 1800) for 0.10° spatial resolution
+# path: folder's name where species conservation feature files are located
+# outdir: where to put the final sf-.rds object
+# pu_shp: 
 
-# raster_region = 
-
-features_pus <- function(path, outdir, pu_shp, proj.geo, olayer) { 
+features_pus <- function(path, outdir, pu_shp, olayer) { 
 
 ####################################################################################
 ####### Defining the main packages (tryining to auto this)
@@ -42,24 +36,28 @@ features_pus <- function(path, outdir, pu_shp, proj.geo, olayer) {
 
   # Reading conservation features .rds files (AquaMaps)
     dir <- path
-    pattern1 <-  c(paste0("*", ".*.rds$"), paste0("*", ".*.tif$")) # include tif rasters and stack rasters
+    pattern1 <-  c(paste0("*", ".*.rds$"), paste0("*", ".*shp$"))
     files <- list.files(path = dir, pattern = paste0(pattern1, collapse = "|"), full.names = TRUE)
 
 ####################################################################################
 ####### 
 ####################################################################################
   # Loop through each file
-    files_list <- list() # to allocate results
+    files_list <- vector("list", length = length(files)) # to allocate results
   # Begin the parallel structure
     ncores <- detectCores()
+    ncores <- ncores - 1 
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
     # A parallel Loop
       PU_list <- foreach(i = 1:length(files), .packages = c("raster", "sf", "dplyr", "stringr", "lwgeom", "data.table")) %dopar% {
-        # Reading features. If the raster is not projected, do it 
-          single <- st_read(files[i]) %>% 
-            st_transform(crs = CRS(geo.prj))
-        # get the polygons from the world raster data
+        # Reading conservation features
+        if(stringr::str_detect(string = region, pattern = ".rds") == TRUE) {
+          single <- readRDS(files[i])
+        } else if (stringr::str_detect(string = region, pattern = ".shp") == TRUE) {
+          single <- st_read(files[i])
+          }
+        # Intersects every conservation feature with planning unit region
           pu_int <- st_intersection(shp_PU_sf, single) %>% 
             filter(st_geometry_type(.) %in% c("POLYGON", "MULTIPOLYGON")) # we want just the polygons/multi not extra geometries
         # Filter the intersection with the world polygon data to get the exact layer names
@@ -93,7 +91,6 @@ features_pus <- function(path, outdir, pu_shp, proj.geo, olayer) {
   system.time(marxan_inputs(path = "shapefiles_rasters/03_MesopelagicLayer_shp",
                             outdir = "shapefiles_rasters/",
                             shapefile = "shapefiles_rasters/abnj_03-bathyabysso_global_moll_05deg/abnj_03-bathyabysso_global_moll_05deg.shp",
-                            proj.geo = "+proj=moll +lon_0=0 +datum=WGS84 +units=m +no_defs",
                             olayer = "bathyabyssopelagic"))
   
   
