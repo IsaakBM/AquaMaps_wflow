@@ -42,7 +42,7 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
   # Reading conservation features .rds files (AquaMaps)
     dir <- path
       pattern1 <-  c(paste0("*", ".*.rds$"), paste0("*", ".*shp$"))
-      files <- list.files(path = dir, pattern = paste0(pattern1, collapse = "|"), full.names = TRUE)[1:2]
+      files <- list.files(path = dir, pattern = paste0(pattern1, collapse = "|"), full.names = TRUE)
 
 ####################################################################################
 ####### 
@@ -56,10 +56,10 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
     # A parallel Loop
       PU_list <- foreach(i = 1:length(files), .packages = c("raster", "sf", "dplyr", "stringr", "lwgeom", "data.table")) %dopar% {
         # Reading conservation features
-        if(stringr::str_detect(string = files[2], pattern = ".rds") == TRUE) {
-          single <- readRDS(files[2])
-        } else if (stringr::str_detect(string = files[2], pattern = ".shp") == TRUE) {
-          single <- st_read(files[2])
+        if(stringr::str_detect(string = files[i], pattern = ".rds") == TRUE) {
+          single <- readRDS(files[i])
+        } else if (stringr::str_detect(string = files[i], pattern = ".shp") == TRUE) {
+          single <- st_read(files[i])
           }
         # Intersects every conservation feature with planning unit region
           pu_int <- st_intersection(shp_PU_sf, single) %>% 
@@ -82,16 +82,16 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
 ####################################################################################
 ####### 
 ####################################################################################
-  # Final sf dataframe with all species information and write that object (main object to develop marxan input files)
-    PU_list_b <- data.table::rbindlist(PU_list, use.names = TRUE)  
+  # Final sf with all species information and write that object (main object to develop marxan input files)
+    PU_list_b <- do.call(rbind, PU_list)
     # Write the object
-      pu_csv <- paste(olayer, ".csv", sep = "")
-      fwrite(dplyr::select(PU_list_b, -geometry, -layer2), paste(outdir, pu_csv, sep = ""))
+      pu_rds <- paste(olayer, ".rds", sep = "")
+      saveRDS(pu_rds, paste(outdir, pu_rds, sep = ""))
   return(PU_list_b)
   }
   
   system.time(marxan_inputs(path = "RDS",
-                            outdir = "shapefiles_rasters/",
+                            outdir = "OutputFiles/",
                             shapefile = "InputFiles/PUsPacific/PacificABNJGrid_05deg.rds",
                             olayer = "surface"))
   
