@@ -89,12 +89,3 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
       saveRDS(pu_rds, paste(outdir, pu_rds, sep = ""))
   return(PU_list_b)
   }
-  
-  system.time(marxan_inputs(path = "RDS",
-                            outdir = "OutputFiles/",
-                            shapefile = "InputFiles/PUsPacific/PacificABNJGrid_05deg.rds",
-                            olayer = "surface"))
-  
-  
-  
-  
