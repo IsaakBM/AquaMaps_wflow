@@ -42,7 +42,7 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
   # Reading conservation features .rds files (AquaMaps)
     dir <- path
       pattern1 <-  c(paste0("*", ".*.rds$"), paste0("*", ".*shp$"))
-      files <- list.files(path = dir, pattern = paste0(pattern1, collapse = "|"), full.names = TRUE)
+      files <- list.files(path = dir, pattern = paste0(pattern1, collapse = "|"), full.names = TRUE)[1:2]
 
 ####################################################################################
 ####### 
@@ -56,10 +56,10 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
     # A parallel Loop
       PU_list <- foreach(i = 1:length(files), .packages = c("raster", "sf", "dplyr", "stringr", "lwgeom", "data.table")) %dopar% {
         # Reading conservation features
-        if(stringr::str_detect(string = files[i], pattern = ".rds") == TRUE) {
-          single <- readRDS(files[i])
-        } else if (stringr::str_detect(string = files[i], pattern = ".shp") == TRUE) {
-          single <- st_read(files[i])
+        if(stringr::str_detect(string = files[2], pattern = ".rds") == TRUE) {
+          single <- readRDS(files[2])
+        } else if (stringr::str_detect(string = files[2], pattern = ".shp") == TRUE) {
+          single <- st_read(files[2])
           }
         # Intersects every conservation feature with planning unit region
           pu_int <- st_intersection(shp_PU_sf, single) %>% 
@@ -68,11 +68,12 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
           if(nrow(pu_int) > 0) { # to avoid empty sf objects 
             files_list[[i]] <- st_join(x = shp_PU_sf, y = pu_int,  by = "cellsID") %>% 
               na.omit() %>% 
-              dplyr::group_by(cellsID.x, cellsID.y) %>% 
+              dplyr::group_by(cellsID.x) %>% 
               dplyr::summarise(cellsID = unique(cellsID.x)) %>% 
               dplyr::select(cellsID, geometry) %>% 
-              dplyr::mutate (area_km2 = as.numeric(st_area(geometry)/1e+06),
-                             feature_names = paste(unlist(strsplit(basename(files[i]), "_"))[1], olayer, sep = "_"))
+              dplyr::mutate(area_km2 = as.numeric(st_area(geometry)/1e+06),
+                            feature_names = paste(unlist(strsplit(basename(files[i]), "_"))[1], olayer, sep = "_")) %>% 
+              ungroup()
                 # dplyr::filter(area_km2 >= pu_min_area) %>% 
               }
           }
