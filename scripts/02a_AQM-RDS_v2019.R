@@ -25,10 +25,10 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
 ####### 
 ####################################################################################
   #
-    if(stringr::str_detect(string = shapefile, pattern = ".rds") == TRUE) {
-      shp_PU_sf <- readRDS(shapefile)
-    } else if (stringr::str_detect(string = shapefile, pattern = ".shp") == TRUE) {
-      shp_PU_sf <- st_read(shapefile)
+    if(stringr::str_detect(string = pu_shp, pattern = ".rds") == TRUE) {
+      shp_PU_sf <- readRDS(pu_shp)
+    } else if (stringr::str_detect(string = pu_shp, pattern = ".shp") == TRUE) {
+      shp_PU_sf <- st_read(pu_shp)
     }
     # If no cellsID values were assinged to the original
       if(colnames(shp_PU_sf) == "geometry") {shp_PU_sf <- mutate(shp_PU_sf, cellsID = 1:nrow(shp_PU_sf))} else{shp_PU_sf}
