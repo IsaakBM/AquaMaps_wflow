@@ -8,7 +8,7 @@
 ####################################################################################
 # Use the source argument to call the function into the R environment
 source("scripts/02a_AQM-RDS_v2019.R") 
-features_pus(path = "RDS",
+run01 <- features_pus(path = "RDS",
              outdir = "OutputFiles/",
              pu_shp = "InputFiles/PUsPacific/PacificABNJGrid_05deg.rds",
              olayer = "surface")
