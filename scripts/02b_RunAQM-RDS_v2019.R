@@ -8,7 +8,7 @@
 ####################################################################################
 # Use the source argument to call the function into the R environment
 source("scripts/02a_AQM-RDS_v2019.R") 
-marxan_inputs(path = "RDS",
-              outdir = "OutputFiles/",
-              shapefile = "InputFiles/PUsPacific/PacificABNJGrid_05deg.rds",
-              olayer = "surface")
+features_pus(path = "RDS",
+             outdir = "OutputFiles/",
+             shapefile = "InputFiles/PUsPacific/PacificABNJGrid_05deg.rds",
+             olayer = "surface")

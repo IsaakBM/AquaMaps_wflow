@@ -86,6 +86,6 @@ features_pus <- function(path, outdir, pu_shp, olayer) {
     PU_list_b <- do.call(rbind, PU_list)
     # Write the object
       pu_rds <- paste(olayer, ".rds", sep = "")
-      saveRDS(pu_rds, paste(outdir, pu_rds, sep = ""))
+      saveRDS(PU_list_b, paste(outdir, pu_rds, sep = ""))
   return(PU_list_b)
   }
