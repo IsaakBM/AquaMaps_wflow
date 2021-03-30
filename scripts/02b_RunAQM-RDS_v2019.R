@@ -10,5 +10,5 @@
 source("scripts/02a_AQM-RDS_v2019.R") 
 run01 <- features_pus(path = "RDS",
              outdir = "OutputFiles/",
-             pu_shp = "InputFiles/PUsPacific/PacificABNJGrid_05deg.rds",
+             pu_shp = "InputFiles/PacificABNJGrid_05/PacificABNJGrid_05deg.shp",
              olayer = "surface")
